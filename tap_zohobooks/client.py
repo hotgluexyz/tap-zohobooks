@@ -3,7 +3,7 @@
 import requests
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, List, Iterable
-
+import urllib
 from memoization import cached
 from pendulum import parse
 from singer_sdk.helpers.jsonpath import extract_jsonpath
@@ -82,5 +82,8 @@ class ZohoBooksStream(RESTStream):
 
         rep_key_value = self.get_starting_time(context)
         if rep_key_value is not None:
-            params["last_modified_time"] = str(rep_key_value)
+            rep_key_string = str(rep_key_value)
+            time_zone_part = rep_key_string.split("-")[-1].replace(":", "")
+            rep_key_string = "-".join(rep_key_string.split("-")[:-1] + [time_zone_part])
+            params["last_modified_time"] = rep_key_string
         return params
