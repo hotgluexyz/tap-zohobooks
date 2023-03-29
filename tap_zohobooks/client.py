@@ -8,6 +8,7 @@ from memoization import cached
 from pendulum import parse
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import RESTStream
+from datetime import datetime, timezone
 
 from tap_zohobooks.auth import OAuth2Authenticator
 
@@ -30,8 +31,6 @@ class ZohoBooksStream(RESTStream):
             start_date = None
 
         rep_key = self.get_starting_replication_key_value(context)
-        if rep_key:
-            rep_key = parse(rep_key)
         return rep_key or start_date
 
     @property
@@ -82,8 +81,9 @@ class ZohoBooksStream(RESTStream):
 
         rep_key_value = self.get_starting_time(context)
         if rep_key_value is not None:
-            rep_key_string = str(rep_key_value)
-            time_zone_part = rep_key_string.split("-")[-1].replace(":", "")
-            rep_key_string = "-".join(rep_key_string.split("-")[:-1] + [time_zone_part])
-            params["last_modified_time"] = rep_key_string
+            start_date = datetime.strptime(rep_key_value, '%Y-%m-%dT%H:%M:%SZ')
+            start_date = start_date.replace(tzinfo=timezone.utc).timestamp()
+            start_date = datetime.fromtimestamp(start_date).strftime('%Y-%m-%dT%H:%M:%S')
+            start_date = start_date + "-0000"
+            params["last_modified_time"] = start_date
         return params
