@@ -199,7 +199,7 @@ class SalesOrdersStream(ZohoBooksStream):
         th.Property("reference_number", th.StringType),
         th.Property("date", th.StringType),
         th.Property("shipment_date", th.StringType),
-        th.Property("shipment_days", th.IntegerType),
+        th.Property("shipment_days", th.StringType),
         th.Property("currency_id", th.StringType),
         th.Property("currency_code", th.StringType),
         th.Property("total", th.NumberType),
