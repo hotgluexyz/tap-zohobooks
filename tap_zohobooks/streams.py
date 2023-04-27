@@ -141,8 +141,8 @@ class JournalStream(ZohoBooksStream):
                 )
             ),
         ),
-        th.Property("created_time", th.StringType),
-        th.Property("last_modified_time", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
         th.Property("status", th.StringType),
         th.Property("custom_fields", th.CustomType({"type": ["array", "string"]})),
     ).to_dict()
@@ -175,8 +175,8 @@ class ChartOfAccountsStream(ZohoBooksStream):
         th.Property("is_child_present", th.BooleanType),
         th.Property("child_count", th.StringType),
         th.Property("documents", th.ArrayType(th.StringType)),
-        th.Property("created_time", th.StringType),
-        th.Property("last_modified_time", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
     ).to_dict()
 
 
@@ -205,8 +205,8 @@ class SalesOrdersStream(ZohoBooksStream):
         th.Property("total", th.NumberType),
         th.Property("sub_total", th.IntegerType),
         th.Property("bcy_total", th.NumberType),
-        th.Property("created_time", th.StringType),
-        th.Property("last_modified_time", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
         th.Property("is_emailed", th.BooleanType),
         th.Property("has_attachment", th.BooleanType),
         th.Property(
@@ -258,8 +258,8 @@ class ItemsStream(ZohoBooksStream):
         th.Property("image_name", th.StringType),
         th.Property("image_type", th.StringType),
         th.Property("image_document_id", th.StringType),
-        th.Property("created_time", th.StringType),
-        th.Property("last_modified_time", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
         th.Property("show_in_storefront", th.BooleanType),
     ).to_dict()
 
@@ -335,8 +335,8 @@ class InvoicesStream(ZohoBooksStream):
         th.Property("transaction_type", th.StringType),
         th.Property("total", th.NumberType),
         th.Property("balance", th.NumberType),
-        th.Property("created_time", th.StringType),
-        th.Property("last_modified_time", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
         th.Property("is_emailed", th.BooleanType),
         th.Property("is_viewed_in_mail", th.BooleanType),
         th.Property("mail_first_viewed_time", th.StringType),
@@ -402,8 +402,8 @@ class ContactsStream(ZohoBooksStream):
         th.Property("mobile", th.StringType),
         th.Property("portal_status", th.StringType),
         th.Property("track_1099", th.BooleanType),
-        th.Property("created_time", th.StringType),
-        th.Property("created_time_formatted", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("created_time_formatted", th.DateTimeType),
         th.Property("last_modified_time", th.StringType),
         th.Property("last_modified_time_formatted", th.StringType),
         th.Property("custom_fields", th.CustomType({"type": ["array", "string"]})),
