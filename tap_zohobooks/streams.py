@@ -411,6 +411,7 @@ class ContactsStream(ZohoBooksStream):
         th.Property("ach_supported", th.BooleanType),
         th.Property("has_attachment", th.BooleanType),
     ).to_dict()
+
 class BillsStream(ZohoBooksStream):
     name = "bills"
     path = "/bills"

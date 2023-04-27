@@ -19,7 +19,12 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 class ZohoBooksStream(RESTStream):
     """ZohoBooks stream class."""
 
-    url_base = "https://books.zoho.com/api/v3"
+    @property
+    def url_base(self) -> str:
+        """Return the API URL root, configurable via tap settings."""
+        account_server = self._tap.config.get("accounts-server", "https://accounts.zoho.com")
+        account_server = account_server.replace("accounts.", "books.")
+        return f"{account_server}/api/v3"
 
     records_jsonpath = "$[*]"  # Or override `parse_response`.
 
