@@ -141,8 +141,8 @@ class JournalStream(ZohoBooksStream):
                 )
             ),
         ),
-        th.Property("created_time", th.StringType),
-        th.Property("last_modified_time", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
         th.Property("status", th.StringType),
         th.Property("custom_fields", th.CustomType({"type": ["array", "string"]})),
     ).to_dict()
@@ -175,8 +175,8 @@ class ChartOfAccountsStream(ZohoBooksStream):
         th.Property("is_child_present", th.BooleanType),
         th.Property("child_count", th.StringType),
         th.Property("documents", th.ArrayType(th.StringType)),
-        th.Property("created_time", th.StringType),
-        th.Property("last_modified_time", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
     ).to_dict()
 
 
@@ -205,8 +205,8 @@ class SalesOrdersStream(ZohoBooksStream):
         th.Property("total", th.NumberType),
         th.Property("sub_total", th.IntegerType),
         th.Property("bcy_total", th.NumberType),
-        th.Property("created_time", th.StringType),
-        th.Property("last_modified_time", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
         th.Property("is_emailed", th.BooleanType),
         th.Property("has_attachment", th.BooleanType),
         th.Property(
@@ -258,8 +258,8 @@ class ItemsStream(ZohoBooksStream):
         th.Property("image_name", th.StringType),
         th.Property("image_type", th.StringType),
         th.Property("image_document_id", th.StringType),
-        th.Property("created_time", th.StringType),
-        th.Property("last_modified_time", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
         th.Property("show_in_storefront", th.BooleanType),
     ).to_dict()
 
@@ -335,8 +335,8 @@ class InvoicesStream(ZohoBooksStream):
         th.Property("transaction_type", th.StringType),
         th.Property("total", th.NumberType),
         th.Property("balance", th.NumberType),
-        th.Property("created_time", th.StringType),
-        th.Property("last_modified_time", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
         th.Property("is_emailed", th.BooleanType),
         th.Property("is_viewed_in_mail", th.BooleanType),
         th.Property("mail_first_viewed_time", th.StringType),
@@ -402,12 +402,44 @@ class ContactsStream(ZohoBooksStream):
         th.Property("mobile", th.StringType),
         th.Property("portal_status", th.StringType),
         th.Property("track_1099", th.BooleanType),
-        th.Property("created_time", th.StringType),
-        th.Property("created_time_formatted", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("created_time_formatted", th.DateTimeType),
         th.Property("last_modified_time", th.StringType),
         th.Property("last_modified_time_formatted", th.StringType),
         th.Property("custom_fields", th.CustomType({"type": ["array", "string"]})),
         th.Property("custom_field_hash", th.CustomType({"type": ["array", "object"]})),
         th.Property("ach_supported", th.BooleanType),
         th.Property("has_attachment", th.BooleanType),
+    ).to_dict()
+class BillsStream(ZohoBooksStream):
+    name = "bills"
+    path = "/bills"
+    primary_keys = ["bill_id"]
+    replication_key = "last_modified_time"
+    records_jsonpath: str = "$.bills[*]"
+    parent_stream_type = OrganizationIdStream
+
+    schema = th.PropertiesList(
+        th.Property("bill_id", th.StringType),
+        th.Property("vendor_id", th.StringType),
+        th.Property("vendor_id", th.StringType),
+        th.Property("vendor_name", th.StringType),
+        th.Property("status", th.StringType),
+        th.Property("bill_number", th.StringType),
+        th.Property("reference_number", th.StringType),
+        th.Property("date", th.DateType),
+        th.Property("due_date", th.DateType),
+        th.Property("due_days", th.StringType),
+        th.Property("currency_id", th.StringType),
+        th.Property("currency_code", th.StringType),
+        th.Property("price_precision", th.NumberType),
+        th.Property("exchange_rate", th.NumberType),
+        th.Property("total", th.NumberType),
+        th.Property("balance", th.NumberType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
+        th.Property("attachment_name", th.StringType),
+        th.Property("has_attachment", th.BooleanType),
+        th.Property("is_tds_applied", th.BooleanType),
+        th.Property("is_abn_quoted", th.StringType),
     ).to_dict()

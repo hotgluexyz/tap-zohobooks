@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tap-zohobooks"
-version = "0.0.1"
+version = "0.0.2"
 description = "`tap-zohobooks` is a Singer tap for ZohoBooks, built with the Meltano Singer SDK."
 authors = ["FirstName LastName"]
 keywords = [
