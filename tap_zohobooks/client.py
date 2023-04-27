@@ -37,8 +37,9 @@ class ZohoBooksStream(RESTStream):
     @cached
     def authenticator(self) -> OAuth2Authenticator:
         """Return a new authenticator object."""
+        account_server = self._tap.config.get("accounts-server", "https://accounts.zoho.com")
         return OAuth2Authenticator(
-            self, self._tap.config, "https://accounts.zoho.com/oauth/v2/token"
+            self, self._tap.config, f"{account_server}/oauth/v2/token"
         )
 
     @property
