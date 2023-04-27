@@ -411,3 +411,35 @@ class ContactsStream(ZohoBooksStream):
         th.Property("ach_supported", th.BooleanType),
         th.Property("has_attachment", th.BooleanType),
     ).to_dict()
+class BillsStream(ZohoBooksStream):
+    name = "bills"
+    path = "/bills"
+    primary_keys = ["bill_id"]
+    replication_key = "last_modified_time"
+    records_jsonpath: str = "$.bills[*]"
+    parent_stream_type = OrganizationIdStream
+
+    schema = th.PropertiesList(
+        th.Property("bill_id", th.StringType),
+        th.Property("vendor_id", th.StringType),
+        th.Property("vendor_id", th.StringType),
+        th.Property("vendor_name", th.StringType),
+        th.Property("status", th.StringType),
+        th.Property("bill_number", th.StringType),
+        th.Property("reference_number", th.StringType),
+        th.Property("date", th.DateType),
+        th.Property("due_date", th.DateType),
+        th.Property("due_days", th.StringType),
+        th.Property("currency_id", th.StringType),
+        th.Property("currency_code", th.StringType),
+        th.Property("price_precision", th.NumberType),
+        th.Property("exchange_rate", th.NumberType),
+        th.Property("total", th.NumberType),
+        th.Property("balance", th.NumberType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
+        th.Property("attachment_name", th.StringType),
+        th.Property("has_attachment", th.BooleanType),
+        th.Property("is_tds_applied", th.BooleanType),
+        th.Property("is_abn_quoted", th.StringType),
+    ).to_dict()

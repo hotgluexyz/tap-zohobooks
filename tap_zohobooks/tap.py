@@ -5,7 +5,6 @@ from typing import List
 from singer_sdk import Tap, Stream
 from singer_sdk import typing as th  # JSON schema typing helpers
 
-# TODO: Import your custom stream types here:
 from tap_zohobooks.streams import (
     OrganizationIdStream,
     InvoicesStream,
@@ -15,6 +14,7 @@ from tap_zohobooks.streams import (
     SalesOrdersStream,
     ItemsStream,
     ContactsStream,
+    BillsStream,
 )
 
 STREAM_TYPES = [
@@ -26,6 +26,7 @@ STREAM_TYPES = [
     SalesOrdersStream,
     ItemsStream,
     ContactsStream,
+    BillsStream,
 ]
 
 
@@ -45,7 +46,6 @@ class TapZohoBooks(Tap):
         self.config_file = config[0]
         super().__init__(config, catalog, state, parse_env_config, validate_config)
 
-    # TODO: Update this section with the actual config values you expect:
     config_jsonschema = th.PropertiesList(
         th.Property(
             "access_token",
