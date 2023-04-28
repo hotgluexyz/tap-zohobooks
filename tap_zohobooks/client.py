@@ -2,8 +2,9 @@
 
 import requests
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, List, Iterable
+from typing import Any, Dict, Optional, Union, List, Iterable, Generator
 import urllib
+import backoff
 from memoization import cached
 from pendulum import parse
 from singer_sdk.helpers.jsonpath import extract_jsonpath
@@ -87,3 +88,9 @@ class ZohoBooksStream(RESTStream):
             start_date = start_date + "-0000"
             params["last_modified_time"] = start_date
         return params
+
+    def backoff_wait_generator(self) -> Generator[float, None, None]:
+        return backoff.expo(base=2,factor=3) 
+    
+    def backoff_max_tries(self) -> int:
+        return 7
