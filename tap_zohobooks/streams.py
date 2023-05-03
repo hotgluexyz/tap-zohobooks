@@ -202,6 +202,7 @@ class SalesOrdersStream(ZohoBooksStream):
         th.Property("shipment_days", th.StringType),
         th.Property("currency_id", th.StringType),
         th.Property("currency_code", th.StringType),
+        th.Property("place_of_supply", th.StringType),
         th.Property("total", th.NumberType),
         th.Property("sub_total", th.IntegerType),
         th.Property("bcy_total", th.NumberType),
@@ -220,6 +221,25 @@ class SalesOrdersStream(ZohoBooksStream):
                 )
             ),
         ),
+        th.Property("line_items", th.CustomType({"type": ["array", "string"]})),
+        th.Property("contact_persons", th.CustomType({"type": ["array", "string"]})),
+        th.Property("documents", th.CustomType({"type": ["array", "string"]})),
+        th.Property("contact_persons", th.CustomType({"type": ["array", "string"]})),
+        th.Property("salesperson_id", th.StringType),
+        th.Property("merchant_id", th.StringType),
+        th.Property("gst_no", th.StringType),
+        th.Property("is_inclusive_tax", th.BooleanType),
+        th.Property("discount", th.StringType),
+        th.Property("exchange_rate", th.NumberType),
+        th.Property("salesperson_name", th.StringType),
+        th.Property("notes", th.StringType),
+        th.Property("terms", th.StringType),
+        th.Property("delivery_method", th.StringType),
+        th.Property("discount_type", th.StringType),
+        th.Property("adjustment_description", th.StringType),
+        th.Property("pricebook_id", th.StringType),
+        th.Property("zcrm_potential_id", th.StringType),
+        th.Property("zcrm_potential_name", th.StringType),
     ).to_dict()
 
 
@@ -253,7 +273,10 @@ class ItemsStream(ZohoBooksStream):
         th.Property("purchase_rate", th.NumberType),
         th.Property("item_type", th.StringType),
         th.Property("product_type", th.StringType),
+        th.Property("stock_on_hand", th.NumberType),
         th.Property("has_attachment", th.BooleanType),
+        th.Property("available_stock", th.NumberType),
+        th.Property("actual_available_stock", th.NumberType),
         th.Property("sku", th.StringType),
         th.Property("image_name", th.StringType),
         th.Property("image_type", th.StringType),
@@ -261,6 +284,8 @@ class ItemsStream(ZohoBooksStream):
         th.Property("created_time", th.DateTimeType),
         th.Property("last_modified_time", th.DateTimeType),
         th.Property("show_in_storefront", th.BooleanType),
+        th.Property("item_tax_preferences", th.CustomType({"type": ["array", "string"]})),
+        th.Property("warehouses", th.CustomType({"type": ["array", "string"]})),
     ).to_dict()
 
 
