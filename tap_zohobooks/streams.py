@@ -253,7 +253,10 @@ class ItemsStream(ZohoBooksStream):
         th.Property("purchase_rate", th.NumberType),
         th.Property("item_type", th.StringType),
         th.Property("product_type", th.StringType),
+        th.Property("stock_on_hand", th.NumberType),
         th.Property("has_attachment", th.BooleanType),
+        th.Property("available_stock", th.NumberType),
+        th.Property("actual_available_stock", th.NumberType),
         th.Property("sku", th.StringType),
         th.Property("image_name", th.StringType),
         th.Property("image_type", th.StringType),
@@ -261,6 +264,8 @@ class ItemsStream(ZohoBooksStream):
         th.Property("created_time", th.DateTimeType),
         th.Property("last_modified_time", th.DateTimeType),
         th.Property("show_in_storefront", th.BooleanType),
+        th.Property("item_tax_preferences", th.CustomType({"type": ["array", "string"]})),
+        th.Property("warehouses", th.CustomType({"type": ["array", "string"]})),
     ).to_dict()
 
 
