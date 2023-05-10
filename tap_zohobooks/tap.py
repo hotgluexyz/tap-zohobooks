@@ -12,9 +12,12 @@ from tap_zohobooks.streams import (
     JournalStream,
     ChartOfAccountsStream,
     SalesOrdersStream,
+    SalesOrdersDetailsStream,
     ItemsStream,
     ContactsStream,
     BillsStream,
+    PurchaseOrdersStream,
+    PurchaseOrderDetailsStream,
 )
 
 STREAM_TYPES = [
@@ -24,9 +27,12 @@ STREAM_TYPES = [
     JournalStream,
     ChartOfAccountsStream,
     SalesOrdersStream,
+    SalesOrdersDetailsStream,
     ItemsStream,
     ContactsStream,
     BillsStream,
+    PurchaseOrdersStream,
+    PurchaseOrderDetailsStream,
 ]
 
 
@@ -70,7 +76,7 @@ class TapZohoBooks(Tap):
             "start_date",
             th.DateTimeType,
             description="The earliest record date to sync",
-        )
+        ),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:

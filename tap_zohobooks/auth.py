@@ -66,7 +66,9 @@ class OAuth2Authenticator(APIAuthenticatorBase):
     def is_token_valid(self) -> bool:
         now = round(datetime.utcnow().timestamp())
         expires_in = 3600
-        created_at = self._tap._config.get("created_at", 0) # make sure it returns invalid if created_at is not there, so it can be generated
+        created_at = self._tap._config.get(
+            "created_at", 0
+        )  # make sure it returns invalid if created_at is not there, so it can be generated
 
         return now < (created_at + expires_in - 60)
 
