@@ -23,7 +23,9 @@ class ZohoBooksStream(RESTStream):
     @property
     def url_base(self) -> str:
         """Return the API URL root, configurable via tap settings."""
-        account_server = self._tap.config.get("accounts-server", "https://accounts.zoho.com")
+        account_server = self._tap.config.get(
+            "accounts-server", "https://accounts.zoho.com"
+        )
         account_server = account_server.replace("accounts.", "books.")
         return f"{account_server}/api/v3"
 
@@ -43,7 +45,9 @@ class ZohoBooksStream(RESTStream):
     @cached
     def authenticator(self) -> OAuth2Authenticator:
         """Return a new authenticator object."""
-        account_server = self._tap.config.get("accounts-server", "https://accounts.zoho.com")
+        account_server = self._tap.config.get(
+            "accounts-server", "https://accounts.zoho.com"
+        )
         return OAuth2Authenticator(
             self, self._tap.config, f"{account_server}/oauth/v2/token"
         )
@@ -88,15 +92,17 @@ class ZohoBooksStream(RESTStream):
 
         rep_key_value = self.get_starting_time(context)
         if rep_key_value is not None:
-            start_date = datetime.strptime(rep_key_value, '%Y-%m-%dT%H:%M:%SZ')
+            start_date = datetime.strptime(rep_key_value, "%Y-%m-%dT%H:%M:%SZ")
             start_date = start_date.replace(tzinfo=timezone.utc).timestamp()
-            start_date = datetime.fromtimestamp(start_date).strftime('%Y-%m-%dT%H:%M:%S')
+            start_date = datetime.fromtimestamp(start_date).strftime(
+                "%Y-%m-%dT%H:%M:%S"
+            )
             start_date = start_date + "-0000"
             params["last_modified_time"] = start_date
         return params
 
     def backoff_wait_generator(self) -> Generator[float, None, None]:
-        return backoff.expo(base=2,factor=3) 
-    
+        return backoff.expo(base=2, factor=3)
+
     def backoff_max_tries(self) -> int:
         return 7
