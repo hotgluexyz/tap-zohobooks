@@ -10,6 +10,8 @@ from pendulum import parse
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import RESTStream
 from datetime import datetime, timezone
+from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
+from time import sleep
 
 from tap_zohobooks.auth import OAuth2Authenticator
 
@@ -106,3 +108,16 @@ class ZohoBooksStream(RESTStream):
 
     def backoff_max_tries(self) -> int:
         return 7
+
+    def validate_response(self, response: requests.Response) -> None:
+        if self.name in ["purchase_orders_details", "sales_orders_details", "journals"]:
+            sleep(1.01)
+        if (
+            response.status_code in self.extra_retry_statuses
+            or 500 <= response.status_code < 600
+        ):
+            msg = self.response_error_message(response)
+            raise RetriableAPIError(msg, response)
+        elif 400 <= response.status_code < 500:
+            msg = self.response_error_message(response)
+            raise FatalAPIError(msg)
