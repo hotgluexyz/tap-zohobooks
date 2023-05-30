@@ -18,6 +18,7 @@ from tap_zohobooks.streams import (
     BillsStream,
     PurchaseOrdersStream,
     PurchaseOrderDetailsStream,
+    VendorsStream
 )
 
 STREAM_TYPES = [
@@ -33,6 +34,7 @@ STREAM_TYPES = [
     BillsStream,
     PurchaseOrdersStream,
     PurchaseOrderDetailsStream,
+    VendorsStream
 ]
 
 
