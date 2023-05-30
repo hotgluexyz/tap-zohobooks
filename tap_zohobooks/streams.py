@@ -757,3 +757,51 @@ class PurchaseOrderDetailsStream(ZohoBooksStream):
         th.Property("can_mark_as_bill", th.BooleanType),
         th.Property("can_mark_as_unbill", th.BooleanType),
     ).to_dict()
+
+class VendorsStream(ZohoBooksStream):
+    name = "vendors"
+    path = "/vendors"
+    primary_keys = ["purchaseorder_id"]
+    replication_key = "last_modified_time"
+    records_jsonpath: str = "$.contacts[*]"
+    parent_stream_type = OrganizationIdStream
+
+    schema = th.PropertiesList( 
+        th.Property("contact_id", th.StringType),
+        th.Property("contact_name", th.StringType),
+        th.Property("vendor_name", th.StringType),
+        th.Property("company_name", th.StringType),
+        th.Property("website", th.StringType),
+        th.Property("language_code", th.StringType),
+        th.Property("language_code_formatted", th.StringType),
+        th.Property("contact_type", th.StringType),
+        th.Property("contact_type_formatted", th.StringType),
+        th.Property("status", th.StringType),
+        th.Property("customer_sub_type", th.StringType),
+        th.Property("source", th.StringType),
+        th.Property("is_linked_with_zohocrm", th.BooleanType),
+        th.Property("payment_terms", th.IntegerType),
+        th.Property("payment_terms_label", th.StringType),
+        th.Property("currency_id", th.StringType),
+        th.Property("twitter", th.StringType),
+        th.Property("facebook", th.StringType),
+        th.Property("currency_code", th.StringType),
+        th.Property("outstanding_payable_amount", th.NumberType),
+        th.Property("outstanding_payable_amount_bcy", th.NumberType),
+        th.Property("unused_credits_payable_amount", th.NumberType),
+        th.Property("unused_credits_payable_amount_bcy", th.NumberType),
+        th.Property("first_name", th.StringType),
+        th.Property("last_name", th.StringType),
+        th.Property("email", th.StringType),
+        th.Property("phone", th.StringType),
+        th.Property("mobile", th.StringType),
+        th.Property("portal_status", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("created_time_formatted", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
+        th.Property("last_modified_time_formatted", th.DateTimeType),
+        th.Property("custom_fields", th.ArrayType(th.CustomType({"type": ["object", "string"]}))),
+        th.Property("custom_field_hash", th.CustomType({"type": ["object", "string"]})),
+        th.Property("ach_supported", th.BooleanType),
+        th.Property("has_attachment", th.BooleanType),
+    ).to_dict()
