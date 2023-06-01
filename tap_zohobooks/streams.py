@@ -768,6 +768,7 @@ class VendorsStream(ZohoBooksStream):
 
     schema = th.PropertiesList( 
         th.Property("contact_id", th.StringType),
+        th.Property("vendor_id", th.StringType),
         th.Property("contact_name", th.StringType),
         th.Property("vendor_name", th.StringType),
         th.Property("company_name", th.StringType),
