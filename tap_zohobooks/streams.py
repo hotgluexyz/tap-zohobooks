@@ -190,6 +190,7 @@ class ItemsStream(ZohoBooksStream):
 
     schema = th.PropertiesList(
         th.Property("item_id", th.StringType),
+        th.Property("vendor_id", th.StringType),
         th.Property("name", th.StringType),
         th.Property("item_name", th.StringType),
         th.Property("unit", th.StringType),
