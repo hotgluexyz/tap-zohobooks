@@ -194,6 +194,7 @@ class ItemsStream(ZohoBooksStream):
         th.Property("name", th.StringType),
         th.Property("item_name", th.StringType),
         th.Property("unit", th.StringType),
+        th.Property("unitkey_code", th.StringType),
         th.Property("status", th.StringType),
         th.Property("source", th.StringType),
         th.Property("is_linked_with_zohocrm", th.BooleanType),
