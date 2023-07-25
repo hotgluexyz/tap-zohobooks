@@ -94,7 +94,7 @@ class ZohoBooksStream(RESTStream):
 
         rep_key_value = self.get_starting_time(context)
         if rep_key_value is not None:
-            start_date = datetime.strptime(rep_key_value, "%Y-%m-%dT%H:%M:%SZ")
+            start_date = datetime.strptime(rep_key_value, "%Y-%m-%dT%H:%M:%S%z")
             start_date = start_date.replace(tzinfo=timezone.utc).timestamp()
             start_date = datetime.fromtimestamp(start_date).strftime(
                 "%Y-%m-%dT%H:%M:%S"
