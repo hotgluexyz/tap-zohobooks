@@ -542,7 +542,7 @@ class SalesOrdersDetailsStream(ZohoBooksStream):
         th.Property("currency_symbol", th.StringType),
         th.Property("exchange_rate", th.NumberType),
         th.Property("discount_amount", th.NumberType),
-        th.Property("discount", th.NumberType),
+        th.Property("discount", th.CustomType({"type": ["number", "string"]})),
         th.Property("discount_applied_on_amount", th.NumberType),
         th.Property("is_discount_before_tax", th.BooleanType),
         th.Property("discount_type", th.StringType),
