@@ -302,7 +302,7 @@ class ItemsStream(ZohoBooksStream):
         100 ids per request.
         """
         if not self.config.get("use_item_details", False):
-            return super().parse_response(response)
+            yield from super().parse_response(response)
         
         # gets organization id from the url
         org_id = response.url.replace(
