@@ -1,9 +1,12 @@
 """Stream type classes for tap-zohobooks."""
+import requests
+
+from collections import OrderedDict
 
 from typing import Optional
 
 from singer_sdk import typing as th  # JSON Schema typing helpers
-
+from singer_sdk.helpers.jsonpath import extract_jsonpath
 from tap_zohobooks.client import ZohoBooksStream
 
 
@@ -187,6 +190,163 @@ class ItemsStream(ZohoBooksStream):
     replication_key = "last_modified_time"
     records_jsonpath: str = "$.items[*]"
     parent_stream_type = OrganizationIdStream
+    use_item_details = False
+
+    schema = th.PropertiesList(
+        th.Property("name", th.StringType),
+        th.Property("rate", th.NumberType),
+        th.Property("description", th.StringType),
+        th.Property("tax_id", th.StringType),
+        th.Property("item_id", th.StringType),
+        th.Property("item_name", th.StringType),
+        th.Property("unit", th.StringType),
+        th.Property("unitkey_code", th.StringType),
+        th.Property("status", th.StringType),
+        th.Property("source", th.StringType),
+        th.Property("is_linked_with_zohocrm", th.BooleanType),
+        th.Property("zcrm_product_id", th.StringType),
+        th.Property("is_taxable", th.BooleanType),
+        th.Property("tax_name", th.StringType),
+        th.Property("tax_percentage", th.IntegerType),
+        th.Property("tax_exemption_id", th.StringType),
+        th.Property("purchase_account_id", th.StringType),
+        th.Property("purchase_account_name", th.StringType),
+        th.Property("purchase_tax_rule_id", th.NumberType),
+        th.Property("purchase_description", th.StringType),
+        th.Property("purchase_rate", th.NumberType),
+        th.Property("sales_tax_rule_id", th.NumberType),
+        th.Property("avatax_tax_code", th.NumberType),
+        th.Property("avatax_use_code", th.NumberType),
+        th.Property("account_id", th.StringType),
+        th.Property("account_name", th.StringType),
+        th.Property("item_type", th.StringType),
+        th.Property("product_type", th.StringType),
+        th.Property("hsn_or_sac", th.StringType),
+        th.Property("sat_item_key_code", th.StringType),
+        th.Property("stock_on_hand", th.NumberType),
+        th.Property("has_attachment", th.BooleanType),
+        th.Property("available_stock", th.NumberType),
+        th.Property("actual_available_stock", th.NumberType),
+        th.Property("sku", th.StringType),
+        th.Property("reorder_level", th.StringType),
+        th.Property("initial_stock", th.StringType),
+        th.Property("initial_stock_rate", th.StringType),
+        th.Property("image_name", th.StringType),
+        th.Property("image_type", th.StringType),
+        th.Property("image_document_id", th.StringType),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
+        th.Property("show_in_storefront", th.BooleanType),
+        th.Property("vendor_id", th.StringType),
+        th.Property("vendor_name", th.StringType),
+        th.Property("tax_type", th.StringType),
+        th.Property("inventory_account_id", th.StringType),
+        th.Property("inventory_account_name", th.StringType),
+        th.Property("is_combo_product", th.BooleanType),
+        th.Property("pricebook_rate", th.NumberType),
+        th.Property(
+            "price_brackets", th.CustomType({"type": ["array", "string"]})
+        ),
+        th.Property("package_details", th.ObjectType(
+            th.Property("length", th.StringType),
+            th.Property("width", th.StringType),
+            th.Property("height", th.StringType),
+            th.Property("weight", th.StringType),
+            th.Property("weight_unit", th.StringType),
+            th.Property("dimension_unit", th.StringType),
+        )),
+        th.Property(
+            "tags", th.CustomType({"type": ["array", "string"]})
+        ),
+        th.Property(
+            "item_tax_preferences", th.CustomType({"type": ["array", "string"]})
+        ),
+        th.Property(
+            "custom_fields", th.CustomType({"type": ["array", "string"]})
+        ),
+        th.Property(
+            "preferred_vendors", th.CustomType({"type": ["array", "string"]})
+        ),
+        th.Property("warehouses", th.CustomType({"type": ["array", "string"]})),
+    ).to_dict()
+
+    def _divide_chunks(self, list, limit=100):
+        for i in range(0, len(list), limit):
+            yield list[i : i + limit]
+
+    def _prepare_details_request(self, url, params):
+        if "item_ids" not in params:
+            raise ValueError("Missing Item IDs for request")
+        
+        return self.build_prepared_request(
+            method="GET",
+            url=url,
+            params=params,
+            headers=self.http_headers,
+            auth=self.authenticator
+        )
+
+    def get_child_context(self, record: dict, context: Optional[dict]) -> dict:
+        """Return a context dictionary for child streams."""
+        return {
+            "item_id": record["item_id"],
+            "organization_id": context.get("organization_id"),
+        }
+
+    def parse_response(self, response):
+        """
+        This function works getting all of the data from the Stream
+        and adds item details to each item of the stream available.
+
+        It does it using the /itemdetails endpoint, chunking with
+        100 ids per request.
+        """
+        if not self.config.get("use_item_details", False):
+            return super().parse_response(response)
+        
+        # gets organization id from the url
+        org_id = response.url.replace(
+            self.url_base + "/items?", ""
+        ).split("&")[0].replace("organization_id=", "")
+        details_base_url = self.url_base + "/itemdetails"
+        records = list(extract_jsonpath(self.records_jsonpath, input=response.json()))
+
+        # get all item ids from the records and create a dict with it
+        record_ids = OrderedDict((record.get("item_id"), record) for record in records)
+
+        # chunks the request, preserving API quota
+        for chunk in self._divide_chunks(list(record_ids.keys())):
+            params = {
+                "organization_id": org_id,
+                "item_ids": ",".join(chunk)
+            }
+            detail_response = requests.get(
+                details_base_url,
+                params=params,
+                headers=self.authenticator.auth_headers
+            )
+            
+            item_details = extract_jsonpath(self.records_jsonpath, input=detail_response.json())
+            
+            for item_detail in item_details:
+                for key in [
+                    key for key in item_detail.keys()
+                    if key not in record_ids[item_detail["item_id"]]
+                ]:
+                    # Adds data from missing keys
+                    record_ids[item_detail["item_id"]][key] = item_detail[key]
+                
+                yield record_ids[item_detail["item_id"]]
+
+
+class ItemsDetailStream(ZohoBooksStream):
+    name = "item_details"
+    path = "/items/{item_id}"
+    primary_keys = ["item_id"]
+    replication_key = "last_modified_time"
+    records_jsonpath: str = "$.item[*]"
+    parent_stream_type = ItemsStream
+    ignore_parent_replication_keys = True
 
     schema = th.PropertiesList(
         th.Property("name", th.StringType),
@@ -201,6 +361,9 @@ class ItemsStream(ZohoBooksStream):
         th.Property("status", th.StringType),
         th.Property("source", th.StringType),
         th.Property("is_linked_with_zohocrm", th.BooleanType),
+        th.Property("is_fulfillable", th.BooleanType),
+        th.Property("is_default_tax_applied", th.BooleanType),
+        th.Property("crm_owner_id", th.StringType),
         th.Property("zcrm_product_id", th.StringType),
         th.Property("is_taxable", th.BooleanType),
         th.Property("tax_name", th.StringType),
@@ -228,19 +391,65 @@ class ItemsStream(ZohoBooksStream):
         th.Property("actual_available_stock", th.NumberType),
         th.Property("sku", th.StringType),
         th.Property("reorder_level", th.StringType),
-        th.Property("initial_stock", th.StringType),
-        th.Property("initial_stock_rate", th.StringType),
+        th.Property("initial_stock", th.NumberType),
+        th.Property("brand", th.StringType),
+        th.Property("associated_template_id", th.StringType),
+        th.Property("initial_stock_rate", th.NumberType),
         th.Property("image_name", th.StringType),
         th.Property("image_type", th.StringType),
-        th.Property("image_document_id", th.StringType),
+        th.Property("created_at", th.DateType),
         th.Property("created_time", th.DateTimeType),
         th.Property("last_modified_time", th.DateTimeType),
         th.Property("show_in_storefront", th.BooleanType),
+        th.Property("vendor_id", th.StringType),
+        th.Property("vendor_name", th.StringType),
+        th.Property("tax_type", th.StringType),
+        th.Property("inventory_account_id", th.StringType),
+        th.Property("inventory_account_name", th.StringType),
+        th.Property("pricebook_rate", th.NumberType),
+        th.Property("sales_rate", th.NumberType),
+        th.Property("unit_id", th.StringType),
+        th.Property("zcrm_product_id", th.StringType),
+        th.Property("reorder_level", th.StringType),
+        th.Property(
+            "sales_channels", th.CustomType({"type": ["array", "string"]})
+        ),
+        th.Property("package_details", th.ObjectType(
+            th.Property("length", th.StringType),
+            th.Property("width", th.StringType),
+            th.Property("height", th.StringType),
+            th.Property("weight", th.StringType),
+            th.Property("weight_unit", th.StringType),
+            th.Property("dimension_unit", th.StringType),
+        )),
+        th.Property(
+            "tags", th.CustomType({"type": ["array", "string"]})
+        ),
         th.Property(
             "item_tax_preferences", th.CustomType({"type": ["array", "string"]})
         ),
+        th.Property(
+            "custom_fields", th.CustomType({"type": ["array", "string"]})
+        ),
+        th.Property("manufacturer", th.StringType),
+        th.Property("minimum_order_quantity", th.StringType),
+        th.Property("maximum_order_quantity", th.StringType),
+        th.Property("offline_created_date_with_time", th.DateTimeType),
+        th.Property(
+            "preferred_vendors", th.ArrayType(th.ObjectType(
+                th.Property("is_primary", th.BooleanType),
+                th.Property("item_price", th.NumberType),
+                th.Property("item_stock", th.NumberType),
+                th.Property("last_modified_time", th.DateTimeType),
+                th.Property("vendor_id", th.StringType),
+                th.Property("vendor_name", th.StringType),
+            ))
+        ),
         th.Property("warehouses", th.CustomType({"type": ["array", "string"]})),
+        th.Property("documents", th.CustomType({"type": ["array", "string"]})),
+        th.Property("custom_field_hash", th.CustomType({"type": ["object", "string"]})),
     ).to_dict()
+
 
 class InvoicesStream(ZohoBooksStream):
     name = "invoices"
@@ -771,6 +980,7 @@ class PurchaseOrderDetailsStream(ZohoBooksStream):
         th.Property("can_mark_as_bill", th.BooleanType),
         th.Property("can_mark_as_unbill", th.BooleanType),
     ).to_dict()
+
 
 class VendorsStream(ZohoBooksStream):
     name = "vendors"
