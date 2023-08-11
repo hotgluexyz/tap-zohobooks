@@ -303,6 +303,7 @@ class ItemsStream(ZohoBooksStream):
         """
         if not self.config.get("use_item_details", False):
             yield from super().parse_response(response)
+            return
         
         # gets organization id from the url
         org_id = response.url.replace(
