@@ -392,7 +392,7 @@ class ItemsDetailStream(ZohoBooksStream):
         th.Property("actual_available_stock", th.NumberType),
         th.Property("sku", th.StringType),
         th.Property("reorder_level", th.StringType),
-        th.Property("initial_stock", th.NumberType),
+        th.Property("initial_stock", th.CustomType({"type": ["number", "string"]})),
         th.Property("brand", th.StringType),
         th.Property("associated_template_id", th.StringType),
         th.Property("initial_stock_rate", th.NumberType),
