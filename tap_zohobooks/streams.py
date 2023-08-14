@@ -395,7 +395,7 @@ class ItemsDetailStream(ZohoBooksStream):
         th.Property("initial_stock", th.CustomType({"type": ["number", "string"]})),
         th.Property("brand", th.StringType),
         th.Property("associated_template_id", th.StringType),
-        th.Property("initial_stock_rate", th.NumberType),
+        th.Property("initial_stock_rate", th.CustomType({"type": ["number", "string"]})),
         th.Property("image_name", th.StringType),
         th.Property("image_type", th.StringType),
         th.Property("created_at", th.DateType),
