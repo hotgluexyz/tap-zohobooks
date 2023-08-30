@@ -78,6 +78,24 @@ class ZohoBooksStream(RESTStream):
             return None
 
         return current_page + 1
+    
+
+    def _infer_date(self, date):
+        date_formats = [
+            "%Y-%m-%dT%H:%M:%S.%f%z",
+            "%Y-%m-%dT%H:%M:%S.%f",
+            "%Y-%m-%dT%H:%M:%S%z",
+            "%Y-%m-%dT%H:%M:%S",
+            "%Y-%m-%dT%H:%M%z",
+            "%Y-%m-%d",
+        ]
+        for date_format in date_formats:
+            try:
+                return datetime.strptime(date, date_format)
+            except ValueError:
+                continue
+
+        raise ValueError("No valid date format found")
 
     def get_url_params(
         self, context: Optional[dict], next_page_token: Optional[Any]
@@ -94,12 +112,7 @@ class ZohoBooksStream(RESTStream):
 
         rep_key_value = self.get_starting_time(context)
         if rep_key_value is not None:
-            if "+" in rep_key_value:
-                rep_key_value = f'{rep_key_value.split("+")[0]}'
-            try:
-                start_date = datetime.strptime(rep_key_value, "%Y-%m-%dT%H:%M:%S%z")
-            except:
-                start_date = datetime.strptime(rep_key_value, "%Y-%m-%dT%H:%M:%S")
+            start_date = self._infer_date(rep_key_value)
             start_date = start_date.replace(tzinfo=timezone.utc).timestamp()
             start_date = datetime.fromtimestamp(start_date).strftime(
                 "%Y-%m-%dT%H:%M:%S"
