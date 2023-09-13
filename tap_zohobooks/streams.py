@@ -16,6 +16,7 @@ class OrganizationIdStream(ZohoBooksStream):
     primary_keys = ["organization_id"]
     replication_key = None
     records_jsonpath = "$.organizations[*]"
+    first_run = True
 
     schema = th.PropertiesList(
         th.Property("organization_id", th.StringType),
@@ -26,6 +27,21 @@ class OrganizationIdStream(ZohoBooksStream):
         return {
             "organization_id": record["organization_id"],
         }
+    
+    def _sync_children(self, child_context: dict) -> None:
+        for child_stream in self.child_streams:
+            if child_stream.selected or child_stream.has_selected_descendents:
+                organization_id = self.config.get("organization_id")
+                # if organization_id is set in the config only fetch that organization
+                if organization_id and self.first_run:
+                    child_context = {
+                        "organization_id": organization_id
+                    }
+                    self.first_run = False
+                    child_stream.sync(context=child_context)
+                # if not otganization_id is set in the config fetch all organizations
+                elif not organization_id:
+                    child_stream.sync(context=child_context)
 
 
 class JournalsIdStream(ZohoBooksStream):
