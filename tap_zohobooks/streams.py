@@ -29,6 +29,7 @@ class OrganizationIdStream(ZohoBooksStream):
         }
     
     def _sync_children(self, child_context: dict) -> None:
+        child_streams_len = len(self.child_streams)
         for child_stream in self.child_streams:
             if child_stream.selected or child_stream.has_selected_descendents:
                 organization_id = self.config.get("organization_id")
@@ -37,7 +38,9 @@ class OrganizationIdStream(ZohoBooksStream):
                     child_context = {
                         "organization_id": organization_id
                     }
-                    self.first_run = False
+                    # Check if it is the last child stream to fetch 
+                    if child_stream == self.child_streams[child_streams_len-1]:
+                        self.first_run = False
                     child_stream.sync(context=child_context)
                 # if not otganization_id is set in the config fetch all organizations
                 elif not organization_id:
