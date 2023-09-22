@@ -139,3 +139,19 @@ class ZohoBooksStream(RESTStream):
         elif 400 <= response.status_code < 500:
             msg = self.response_error_message(response)
             raise FatalAPIError(msg)
+
+    def _divide_chunks(self, list, limit=100):
+        for i in range(0, len(list), limit):
+            yield list[i : i + limit]
+
+    def _prepare_details_request(self, url, params, details_param = "item_ids"):
+        if details_param not in params:
+            raise ValueError("Missing details param for request")
+        
+        return self.build_prepared_request(
+            method="GET",
+            url=url,
+            params=params,
+            headers=self.http_headers,
+            auth=self.authenticator
+        )
