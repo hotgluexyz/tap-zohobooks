@@ -268,10 +268,10 @@ class ItemsStream(ZohoBooksStream):
             "price_brackets", th.CustomType({"type": ["array", "string"]})
         ),
         th.Property("package_details", th.ObjectType(
-            th.Property("length", th.StringType),
-            th.Property("width", th.StringType),
-            th.Property("height", th.StringType),
-            th.Property("weight", th.StringType),
+            th.Property("length", th.CustomType({"type": ["number", "string"]})),
+            th.Property("width", th.CustomType({"type": ["number", "string"]})),
+            th.Property("height", th.CustomType({"type": ["number", "string"]})),
+            th.Property("weight", th.CustomType({"type": ["number", "string"]})),
             th.Property("weight_unit", th.StringType),
             th.Property("dimension_unit", th.StringType),
         )),
@@ -420,10 +420,10 @@ class ItemsDetailStream(ZohoBooksStream):
             "sales_channels", th.CustomType({"type": ["array", "string"]})
         ),
         th.Property("package_details", th.ObjectType(
-            th.Property("length", th.StringType),
-            th.Property("width", th.StringType),
-            th.Property("height", th.StringType),
-            th.Property("weight", th.StringType),
+            th.Property("length", th.CustomType({"type": ["number", "string"]})),
+            th.Property("width", th.CustomType({"type": ["number", "string"]})),
+            th.Property("height", th.CustomType({"type": ["number", "string"]})),
+            th.Property("weight", th.CustomType({"type": ["number", "string"]})),
             th.Property("weight_unit", th.StringType),
             th.Property("dimension_unit", th.StringType),
         )),
