@@ -290,22 +290,6 @@ class ItemsStream(ZohoBooksStream):
         th.Property("warehouses", th.CustomType({"type": ["array", "string"]})),
     ).to_dict()
 
-    def _divide_chunks(self, list, limit=100):
-        for i in range(0, len(list), limit):
-            yield list[i : i + limit]
-
-    def _prepare_details_request(self, url, params):
-        if "item_ids" not in params:
-            raise ValueError("Missing Item IDs for request")
-        
-        return self.build_prepared_request(
-            method="GET",
-            url=url,
-            params=params,
-            headers=self.http_headers,
-            auth=self.authenticator
-        )
-
     def get_child_context(self, record: dict, context: Optional[dict]) -> dict:
         """Return a context dictionary for child streams."""
         return {
@@ -735,6 +719,55 @@ class SalesOrdersStream(ZohoBooksStream):
         th.Property("merchant_id", th.StringType),
         th.Property("merchant_name", th.StringType),
     ).to_dict()
+
+
+
+    def parse_response(self, response):
+        """
+        This function works getting all of the data from the Stream
+        and adds item details to each item of the stream available.
+
+        It does it using the /salesorders/ details endpoint, chunking with
+        100 ids per request.
+        """
+        
+        if not self.config.get("use_sales_details", False):
+            yield from super().parse_response(response)
+            return
+
+        # gets organization id from the url
+        org_id = response.url.replace(
+            self.url_base + "/salesorders?", ""
+        ).split("&")[0].replace("organization_id=", "")
+        details_base_url = self.url_base + "/salesorders/"
+        records = list(extract_jsonpath(self.records_jsonpath, input=response.json()))
+
+        # get all item ids from the records and create a dict with it
+        record_ids = OrderedDict((record.get("salesorder_id"), record) for record in records)
+
+        # chunks the request, preserving API quota
+        for chunk in self._divide_chunks(list(record_ids.keys())):
+            params = {
+                "organization_id": org_id,
+                "salesorder_ids": ",".join(chunk)
+            }
+            detail_response = requests.get(
+                details_base_url,
+                params=params,
+                headers=self.authenticator.auth_headers
+            )
+            
+            sales_details = extract_jsonpath(self.records_jsonpath, input=detail_response.json())
+            
+            for sale_detail in sales_details:
+                for key in [
+                    key for key in sale_detail.keys()
+                    if key not in record_ids[sale_detail["salesorder_id"]]
+                ]:
+                    # Adds data from missing keys
+                    record_ids[sale_detail["salesorder_id"]][key] = sale_detail[key]
+                
+                yield record_ids[sale_detail["salesorder_id"]]
 
     def get_child_context(self, record: dict, context: Optional[dict]) -> dict:
         """Return a context dictionary for child streams."""
