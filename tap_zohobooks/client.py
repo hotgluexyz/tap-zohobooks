@@ -122,7 +122,7 @@ class ZohoBooksStream(RESTStream):
         return params
 
     def backoff_wait_generator(self) -> Generator[float, None, None]:
-        return backoff.expo(base=2, factor=3)
+        return backoff.expo(base=2, factor=5)
 
     def backoff_max_tries(self) -> int:
         return 7
