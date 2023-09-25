@@ -248,7 +248,7 @@ class ItemsStream(ZohoBooksStream):
         th.Property("available_stock", th.CustomType({"type": ["number", "string"]})),
         th.Property("actual_available_stock", th.CustomType({"type": ["number", "string"]})),
         th.Property("sku", th.StringType),
-        th.Property("reorder_level", th.StringType),
+        th.Property("reorder_level", th.CustomType({"type": ["number", "string"]})),
         th.Property("initial_stock", th.StringType),
         th.Property("initial_stock_rate", th.StringType),
         th.Property("image_name", th.StringType),
@@ -395,7 +395,7 @@ class ItemsDetailStream(ZohoBooksStream):
         th.Property("available_stock", th.CustomType({"type": ["number", "string"]})),
         th.Property("actual_available_stock", th.CustomType({"type": ["number", "string"]})),
         th.Property("sku", th.StringType),
-        th.Property("reorder_level", th.StringType),
+        th.Property("reorder_level", th.CustomType({"type": ["number", "string"]})),
         th.Property("initial_stock", th.CustomType({"type": ["number", "string"]})),
         th.Property("brand", th.StringType),
         th.Property("associated_template_id", th.StringType),
@@ -415,7 +415,7 @@ class ItemsDetailStream(ZohoBooksStream):
         th.Property("sales_rate", th.CustomType({"type": ["number", "string"]})),
         th.Property("unit_id", th.StringType),
         th.Property("zcrm_product_id", th.StringType),
-        th.Property("reorder_level", th.StringType),
+        th.Property("reorder_level", th.CustomType({"type": ["number", "string"]})),
         th.Property(
             "sales_channels", th.CustomType({"type": ["array", "string"]})
         ),
