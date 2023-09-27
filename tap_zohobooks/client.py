@@ -21,6 +21,25 @@ SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 class ZohoBooksStream(RESTStream):
     """ZohoBooks stream class."""
+    rate_limit_alert = False
+
+    def _request(self, prepared_request, context={}) -> requests.Response:
+        """
+        Custom request function to enable us to throtle the requests,
+        distributing them equaly during the runtime.
+        """
+        response = super()._request(prepared_request, context=context)
+        rate_limit = response.headers.get("X-Rate-Limit-Limit")
+        remaining_rate_limit = response.headers.get("X-Rate-Limit-Remaining")
+        if rate_limit and remaining_rate_limit:
+            sleep(2) # adds cooldown between requests (Rate limit is 30 requests per minute)
+            rate_limit = int(rate_limit)
+            remaining_rate_limit = int(remaining_rate_limit)
+            if (rate_limit - remaining_rate_limit < 500) and not self.rate_limit_alert:
+                self.logger.warning("Rate limit is almost reached (500 requests missing)")
+                self.rate_limit_alert = True
+
+        return response
 
     @property
     def url_base(self) -> str:
@@ -128,7 +147,7 @@ class ZohoBooksStream(RESTStream):
         return 7
 
     def validate_response(self, response: requests.Response) -> None:
-        if self.name in ["purchase_orders_details", "sales_orders_details", "journals"]:
+        if self.name in ["purchase_orders_details", "sales_orders_details", "item_details", "journals"]:
             sleep(1.01)
         if (
             response.status_code in self.extra_retry_statuses
