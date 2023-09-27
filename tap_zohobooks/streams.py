@@ -214,20 +214,25 @@ class ItemsStream(ZohoBooksStream):
 
     schema = th.PropertiesList(
         th.Property("name", th.StringType),
+        th.Property("line_items", th.CustomType({"type": ["array", "string"]})),
         th.Property("rate", th.CustomType({"type": ["number", "string"]})),
         th.Property("description", th.StringType),
         th.Property("tax_id", th.StringType),
         th.Property("item_id", th.StringType),
         th.Property("item_name", th.StringType),
+        th.Property("crm_owner_id", th.StringType),
         th.Property("unit", th.StringType),
         th.Property("unitkey_code", th.StringType),
         th.Property("status", th.StringType),
         th.Property("source", th.StringType),
         th.Property("is_linked_with_zohocrm", th.BooleanType),
+        th.Property("is_fulfillable", th.BooleanType),
         th.Property("zcrm_product_id", th.StringType),
         th.Property("is_taxable", th.BooleanType),
         th.Property("tax_name", th.StringType),
         th.Property("tax_percentage", th.IntegerType),
+        th.Property("sales_rate", th.CustomType({"type": ["number", "string"]})),
+        th.Property("unit_id", th.StringType),
         th.Property("tax_exemption_id", th.StringType),
         th.Property("purchase_account_id", th.StringType),
         th.Property("purchase_account_name", th.StringType),
@@ -250,6 +255,7 @@ class ItemsStream(ZohoBooksStream):
         th.Property("sku", th.StringType),
         th.Property("reorder_level", th.CustomType({"type": ["number", "string"]})),
         th.Property("initial_stock", th.StringType),
+        th.Property("brand", th.StringType),
         th.Property("initial_stock_rate", th.StringType),
         th.Property("image_name", th.StringType),
         th.Property("image_type", th.StringType),
@@ -260,10 +266,15 @@ class ItemsStream(ZohoBooksStream):
         th.Property("vendor_id", th.StringType),
         th.Property("vendor_name", th.StringType),
         th.Property("tax_type", th.StringType),
+        th.Property("associated_template_id", th.StringType),
         th.Property("inventory_account_id", th.StringType),
         th.Property("inventory_account_name", th.StringType),
         th.Property("is_combo_product", th.BooleanType),
+        th.Property("manufacturer", th.StringType),
         th.Property("pricebook_rate", th.CustomType({"type": ["number", "string"]})),
+        th.Property(
+            "sales_channels", th.CustomType({"type": ["array", "string"]})
+        ),
         th.Property(
             "price_brackets", th.CustomType({"type": ["array", "string"]})
         ),
@@ -288,6 +299,11 @@ class ItemsStream(ZohoBooksStream):
             "preferred_vendors", th.CustomType({"type": ["array", "string"]})
         ),
         th.Property("warehouses", th.CustomType({"type": ["array", "string"]})),
+        th.Property("documents", th.CustomType({"type": ["array", "string"]})),
+        th.Property("custom_field_hash", th.CustomType({"type": ["object", "string"]})),
+        th.Property("minimum_order_quantity", th.StringType),
+        th.Property("maximum_order_quantity", th.StringType),
+        th.Property("offline_created_date_with_time", th.DateTimeType),
     ).to_dict()
 
     def get_child_context(self, record: dict, context: Optional[dict]) -> dict:
@@ -325,11 +341,14 @@ class ItemsStream(ZohoBooksStream):
                 "organization_id": org_id,
                 "item_ids": ",".join(chunk)
             }
-            detail_response = requests.get(
+
+            req = requests.Request(
+                "GET",
                 details_base_url,
                 params=params,
                 headers=self.authenticator.auth_headers
             )
+            detail_response = self._request(req.prepare())
             
             item_details = extract_jsonpath(self.records_jsonpath, input=detail_response.json())
             
@@ -650,6 +669,7 @@ class SalesOrdersStream(ZohoBooksStream):
     schema = th.PropertiesList(
         th.Property("salesorder_id", th.StringType),
         th.Property("documents", th.CustomType({"type": ["array", "string"]})),
+        th.Property("line_items", th.CustomType({"type": ["array", "string"]})),
         th.Property("shipment_days", th.StringType),
         th.Property("due_by_days", th.StringType),
         th.Property("due_in_days", th.StringType),
@@ -714,6 +734,7 @@ class SalesOrdersStream(ZohoBooksStream):
         th.Property("created_by_id", th.StringType),
         th.Property("attachment_name", th.StringType),
         th.Property("can_send_in_mail", th.BooleanType),
+        th.Property("has_attachment", th.BooleanType),
         th.Property("salesperson_id", th.StringType),
         th.Property("salesperson_name", th.StringType),
         th.Property("merchant_id", th.StringType),
@@ -751,11 +772,13 @@ class SalesOrdersStream(ZohoBooksStream):
                 "organization_id": org_id,
                 "salesorder_ids": ",".join(chunk)
             }
-            detail_response = requests.get(
+            req = requests.Request(
+                "GET",
                 details_base_url,
                 params=params,
                 headers=self.authenticator.auth_headers
             )
+            detail_response = self._request(req.prepare())
             
             sales_details = extract_jsonpath(self.records_jsonpath, input=detail_response.json())
             
