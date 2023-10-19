@@ -23,6 +23,10 @@ class ZohoBooksStream(RESTStream):
     """ZohoBooks stream class."""
     rate_limit_alert = False
 
+    def backoff_wait_generator(self):
+        self.logger.info("Backoff wait generator")
+        return backoff.expo(factor=2, base=3)
+
     def _request(self, prepared_request, context={}) -> requests.Response:
         """
         Custom request function to enable us to throtle the requests,
@@ -97,7 +101,7 @@ class ZohoBooksStream(RESTStream):
             return None
 
         return current_page + 1
-    
+
 
     def _infer_date(self, date):
         date_formats = [
@@ -166,7 +170,7 @@ class ZohoBooksStream(RESTStream):
     def _prepare_details_request(self, url, params, details_param = "item_ids"):
         if details_param not in params:
             raise ValueError("Missing details param for request")
-        
+
         return self.build_prepared_request(
             method="GET",
             url=url,
