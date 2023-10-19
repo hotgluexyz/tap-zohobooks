@@ -807,6 +807,7 @@ class SalesOrdersDetailsStream(ZohoBooksStream):
     replication_key = "last_modified_time"
     records_jsonpath: str = "$.salesorder[*]"
     parent_stream_type = SalesOrdersStream
+    ignore_parent_replication_key = True
 
     schema = th.PropertiesList(
         th.Property("salesorder_id", th.StringType),
