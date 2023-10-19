@@ -27,7 +27,7 @@ class OrganizationIdStream(ZohoBooksStream):
         return {
             "organization_id": record["organization_id"],
         }
-    
+
     def _sync_children(self, child_context: dict) -> None:
         child_streams_len = len(self.child_streams)
         for child_stream in self.child_streams:
@@ -38,7 +38,7 @@ class OrganizationIdStream(ZohoBooksStream):
                     child_context = {
                         "organization_id": organization_id
                     }
-                    # Check if it is the last child stream to fetch 
+                    # Check if it is the last child stream to fetch
                     if child_stream == self.child_streams[child_streams_len-1]:
                         self.first_run = False
                     child_stream.sync(context=child_context)
@@ -324,7 +324,7 @@ class ItemsStream(ZohoBooksStream):
         if not self.config.get("use_item_details", False):
             yield from super().parse_response(response)
             return
-        
+
         # gets organization id from the url
         org_id = response.url.replace(
             self.url_base + "/items?", ""
@@ -349,9 +349,9 @@ class ItemsStream(ZohoBooksStream):
                 headers=self.authenticator.auth_headers
             )
             detail_response = self._request(req.prepare())
-            
+
             item_details = extract_jsonpath(self.records_jsonpath, input=detail_response.json())
-            
+
             for item_detail in item_details:
                 for key in [
                     key for key in item_detail.keys()
@@ -359,7 +359,7 @@ class ItemsStream(ZohoBooksStream):
                 ]:
                     # Adds data from missing keys
                     record_ids[item_detail["item_id"]][key] = item_detail[key]
-                
+
                 yield record_ids[item_detail["item_id"]]
 
 
@@ -751,7 +751,7 @@ class SalesOrdersStream(ZohoBooksStream):
         It does it using the /salesorders/ details endpoint, chunking with
         100 ids per request.
         """
-        
+
         if not self.config.get("use_sales_details", False):
             yield from super().parse_response(response)
             return
@@ -779,9 +779,9 @@ class SalesOrdersStream(ZohoBooksStream):
                 headers=self.authenticator.auth_headers
             )
             detail_response = self._request(req.prepare())
-            
+
             sales_details = extract_jsonpath(self.records_jsonpath, input=detail_response.json())
-            
+
             for sale_detail in sales_details:
                 for key in [
                     key for key in sale_detail.keys()
@@ -789,7 +789,7 @@ class SalesOrdersStream(ZohoBooksStream):
                 ]:
                     # Adds data from missing keys
                     record_ids[sale_detail["salesorder_id"]][key] = sale_detail[key]
-                
+
                 yield record_ids[sale_detail["salesorder_id"]]
 
     def get_child_context(self, record: dict, context: Optional[dict]) -> dict:
@@ -978,6 +978,7 @@ class PurchaseOrderDetailsStream(ZohoBooksStream):
     replication_key = "last_modified_time"
     records_jsonpath: str = "$.purchaseorder[*]"
     parent_stream_type = PurchaseOrdersStream
+    ignore_parent_replication_key = True
 
     schema = th.PropertiesList(
         th.Property("purchaseorder_id", th.StringType),
@@ -1067,7 +1068,7 @@ class VendorsStream(ZohoBooksStream):
     records_jsonpath: str = "$.contacts[*]"
     parent_stream_type = OrganizationIdStream
 
-    schema = th.PropertiesList( 
+    schema = th.PropertiesList(
         th.Property("contact_id", th.StringType),
         th.Property("vendor_id", th.StringType),
         th.Property("contact_name", th.StringType),
