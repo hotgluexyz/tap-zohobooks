@@ -370,7 +370,6 @@ class ItemsDetailStream(ZohoBooksStream):
     replication_key = "last_modified_time"
     records_jsonpath: str = "$.item[*]"
     parent_stream_type = ItemsStream
-    ignore_parent_replication_keys = True
 
     schema = th.PropertiesList(
         th.Property("name", th.StringType),
