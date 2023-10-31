@@ -3,7 +3,7 @@ import requests
 
 from collections import OrderedDict
 
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from singer_sdk import typing as th  # JSON Schema typing helpers
 from singer_sdk.helpers.jsonpath import extract_jsonpath
@@ -28,23 +28,13 @@ class OrganizationIdStream(ZohoBooksStream):
             "organization_id": record["organization_id"],
         }
 
-    def _sync_children(self, child_context: dict) -> None:
-        child_streams_len = len(self.child_streams)
-        for child_stream in self.child_streams:
-            if child_stream.selected or child_stream.has_selected_descendents:
-                organization_id = self.config.get("organization_id")
-                # if organization_id is set in the config only fetch that organization
-                if organization_id and self.first_run:
-                    child_context = {
-                        "organization_id": organization_id
-                    }
-                    # Check if it is the last child stream to fetch
-                    if child_stream == self.child_streams[child_streams_len-1]:
-                        self.first_run = False
-                    child_stream.sync(context=child_context)
-                # if not otganization_id is set in the config fetch all organizations
-                elif not organization_id:
-                    child_stream.sync(context=child_context)
+    def parse_response(self, response):
+        if not self.config.get("organization_id"):
+            yield from super().parse_response(response)
+
+        for item in super().parse_response(response):
+            if item["organization_id"] == self.config.get("organization_id"):
+                yield item
 
 
 class JournalsIdStream(ZohoBooksStream):
@@ -741,6 +731,9 @@ class SalesOrdersStream(ZohoBooksStream):
     ).to_dict()
 
 
+    def get_url_params(self, context, next_page_token):
+        return super().get_url_params(context, next_page_token)
+
 
     def parse_response(self, response):
         """
@@ -806,7 +799,6 @@ class SalesOrdersDetailsStream(ZohoBooksStream):
     replication_key = "last_modified_time"
     records_jsonpath: str = "$.salesorder[*]"
     parent_stream_type = SalesOrdersStream
-    ignore_parent_replication_key = True
 
     schema = th.PropertiesList(
         th.Property("salesorder_id", th.StringType),
@@ -978,7 +970,6 @@ class PurchaseOrderDetailsStream(ZohoBooksStream):
     replication_key = "last_modified_time"
     records_jsonpath: str = "$.purchaseorder[*]"
     parent_stream_type = PurchaseOrdersStream
-    ignore_parent_replication_key = True
 
     schema = th.PropertiesList(
         th.Property("purchaseorder_id", th.StringType),
