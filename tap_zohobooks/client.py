@@ -6,17 +6,30 @@ from typing import Any, Dict, Optional, Union, List, Iterable, Generator
 import urllib
 import backoff
 from memoization import cached
-from pendulum import parse
+from datetime import datetime, timedelta
+from requests import Response
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import RESTStream
 from datetime import datetime, timezone
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
+from singer_sdk.pagination import BaseAPIPaginator
 from time import sleep
 
 from tap_zohobooks.auth import OAuth2Authenticator
 
 
 SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
+
+
+class ZohoBooksPaginator(BaseAPIPaginator):
+    def get_next(self, response):
+        if self.has_more(response):
+            return response.json().get("page_context", {}).get("page", 1) + 1
+        return None
+
+    def has_more(self, response: Response) -> bool:
+        """Return True if there are more pages available."""
+        return response.json().get("page_context", {}).get("has_more_page", False)
 
 
 class ZohoBooksStream(RESTStream):
@@ -26,6 +39,9 @@ class ZohoBooksStream(RESTStream):
     def backoff_wait_generator(self):
         self.logger.info("Backoff wait generator")
         return backoff.expo(factor=2, base=3)
+
+    def get_new_paginator(self):
+        return ZohoBooksPaginator(start_value=1)
 
     def _request(self, prepared_request, context={}) -> requests.Response:
         """
@@ -85,24 +101,6 @@ class ZohoBooksStream(RESTStream):
             headers["User-Agent"] = self.config.get("user_agent")
         return headers
 
-    def get_next_page_token(
-        self, response: requests.Response, previous_token: Optional[Any]
-    ) -> Optional[Any]:
-        """Return a token for identifying next page or None if no more pages."""
-
-        # if has_more_page
-        r = response.json()
-        try:
-            has_more_pages = r["page_context"]["has_more_page"]
-            current_page = r["page_context"]["page"]
-        except KeyError as ke:
-            return None
-        if not has_more_pages:
-            return None
-
-        return current_page + 1
-
-
     def _infer_date(self, date):
         date_formats = [
             "%Y-%m-%dT%H:%M:%S.%f%z",
@@ -129,18 +127,14 @@ class ZohoBooksStream(RESTStream):
             params["organization_id"] = context.get("organization_id")
         if next_page_token:
             params["page"] = next_page_token
-        # if self.replication_key:
-        #    params["sort"] = "asc"
-        #    params["order_by"] = self.replication_key
 
         rep_key_value = self.get_starting_time(context)
         if rep_key_value is not None:
             start_date = self._infer_date(rep_key_value)
-            start_date = start_date.replace(tzinfo=timezone.utc).timestamp()
-            start_date = datetime.fromtimestamp(start_date).strftime(
-                "%Y-%m-%dT%H:%M:%S"
-            )
-            start_date = start_date + "-0000"
+            start_date = start_date + timedelta(seconds=1)
+            start_date = start_date.isoformat()
+            splited_start_date = start_date.split(":")
+            start_date = ":".join(splited_start_date[:-1]) + splited_start_date[-1]
             params["last_modified_time"] = start_date
         return params
 
