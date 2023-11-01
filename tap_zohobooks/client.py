@@ -132,6 +132,10 @@ class ZohoBooksStream(RESTStream):
         if rep_key_value is not None:
             start_date = self._infer_date(rep_key_value)
             start_date = start_date + timedelta(seconds=1)
+
+            if start_date.microsecond > 0:
+                start_date = start_date.replace(microsecond=0)
+
             start_date = start_date.isoformat()
             splited_start_date = start_date.split(":")
             start_date = ":".join(splited_start_date[:-1]) + splited_start_date[-1]
