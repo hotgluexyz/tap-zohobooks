@@ -33,7 +33,7 @@ class OrganizationIdStream(ZohoBooksStream):
             yield from super().parse_response(response)
 
         for item in super().parse_response(response):
-            if item["organization_id"] == self.config.get("organization_id"):
+            if item["organization_id"] == str(self.config.get("organization_id")):
                 yield item
 
 
