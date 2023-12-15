@@ -125,6 +125,8 @@ class ZohoBooksStream(RESTStream):
         params: dict = {}
         if context is not None:
             params["organization_id"] = context.get("organization_id")
+            params["account_id"] = context.get("account_id")
+
         if next_page_token:
             params["page"] = next_page_token
 
