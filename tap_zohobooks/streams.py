@@ -702,7 +702,7 @@ class InvoiceDetailsStream(ZohoBooksStream):
                     th.Property("internal_name", th.StringType),
                     th.Property("description", th.StringType),
                     th.Property("unit", th.StringType),
-                    th.Property("quantity", th.IntegerType),
+                    th.Property("quantity", th.NumberType),
                     th.Property("discount_amount", th.NumberType),
                     th.Property("discount", th.StringType),
                     th.Property("bcy_rate", th.NumberType),
