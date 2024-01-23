@@ -690,112 +690,7 @@ class InvoiceDetailsStream(ZohoBooksStream):
         th.Property("reference_number", th.StringType),
         th.Property("is_inventory_valuation_pending", th.BooleanType),
         th.Property("lock_details", th.ObjectType()),
-        th.Property(
-            "line_items",
-            th.ArrayType(
-                th.ObjectType(
-                    th.Property("line_item_id", th.StringType),
-                    th.Property("item_id", th.StringType),
-                    th.Property("sku", th.StringType),
-                    th.Property("item_order", th.IntegerType),
-                    th.Property("name", th.StringType),
-                    th.Property("internal_name", th.StringType),
-                    th.Property("description", th.StringType),
-                    th.Property("unit", th.StringType),
-                    th.Property("quantity", th.NumberType),
-                    th.Property("discount_amount", th.NumberType),
-                    th.Property("discount", th.NumberType),
-                    th.Property("bcy_rate", th.NumberType),
-                    th.Property("rate", th.NumberType),
-                    th.Property("account_id", th.StringType),
-                    th.Property("account_name", th.StringType),
-                    th.Property("header_id", th.StringType),
-                    th.Property("header_name", th.StringType),
-                    th.Property("pricebook_id", th.StringType),
-                    th.Property("tax_id", th.StringType),
-                    th.Property("tax_name", th.StringType),
-                    th.Property("tax_type", th.StringType),
-                    th.Property("tax_percentage", th.IntegerType),
-                    th.Property("item_total", th.NumberType),
-                    th.Property(
-                        "item_custom_fields",
-                        th.ArrayType(
-                            th.ObjectType(
-                                th.Property("field_id", th.StringType),
-                                th.Property("customfield_id", th.StringType),
-                                th.Property("show_in_store", th.BooleanType),
-                                th.Property("show_in_portal", th.BooleanType),
-                                th.Property("is_active", th.BooleanType),
-                                th.Property("index", th.IntegerType),
-                                th.Property("label", th.StringType),
-                                th.Property("show_on_pdf", th.BooleanType),
-                                th.Property("edit_on_portal", th.BooleanType),
-                                th.Property("edit_on_store", th.BooleanType),
-                                th.Property("api_name", th.StringType),
-                                th.Property("show_in_all_pdf", th.BooleanType),
-                                th.Property("value_formatted", th.StringType),
-                                th.Property("search_entity", th.StringType),
-                                th.Property("data_type", th.StringType),
-                                th.Property("placeholder", th.StringType),
-                                th.Property("value", th.NumberType),
-                                th.Property("is_dependent_field", th.BooleanType),
-                            )
-                        ),
-                    ),
-                    th.Property("pricing_scheme", th.StringType),
-                    th.Property(
-                        "tags",
-                        th.ArrayType(
-                            th.ObjectType(
-                                th.Property("tag_option_id", th.StringType),
-                                th.Property("is_tag_mandatory", th.BooleanType),
-                                th.Property("tag_name", th.StringType),
-                                th.Property("tag_id", th.StringType),
-                                th.Property("tag_option_name", th.StringType),
-                            )
-                        ),
-                    ),
-                    th.Property("image_document_id", th.StringType),
-                    th.Property("reverse_charge_tax_id", th.StringType),
-                    th.Property(
-                        "line_item_taxes",
-                        th.ArrayType(
-                            th.ObjectType(
-                                th.Property("tax_id", th.StringType),
-                                th.Property("tax_name", th.StringType),
-                                th.Property("tax_amount", th.NumberType),
-                            )
-                        ),
-                    ),
-                    th.Property("bill_id", th.StringType),
-                    th.Property("bill_item_id", th.StringType),
-                    th.Property("warehouse_id", th.StringType),
-                    th.Property("warehouse_name", th.StringType),
-                    th.Property("is_combo_product", th.BooleanType),
-                    th.Property("track_serial_for_package", th.BooleanType),
-                    th.Property("track_batch_for_package", th.BooleanType),
-                    th.Property("project_id", th.StringType),
-                    th.Property("expense_id", th.StringType),
-                    th.Property("item_type", th.StringType),
-                    th.Property("expense_receipt_name", th.StringType),
-                    th.Property("purchase_rate", th.CustomType({"type": ["number", "string"]})),
-                    th.Property("salesorder_item_id", th.StringType),
-                    th.Property("cost_amount", th.IntegerType),
-                    th.Property("markup_percent", th.IntegerType),
-                    th.Property(
-                        "package_details",
-                        th.ObjectType(
-                            th.Property("length", th.StringType),
-                            th.Property("width", th.StringType),
-                            th.Property("height", th.StringType),
-                            th.Property("weight", th.StringType),
-                            th.Property("weight_unit", th.StringType),
-                            th.Property("dimension_unit", th.StringType),
-                        ),
-                    ),
-                )
-            ),
-        ),
+        th.Property("line_items", th.CustomType({"type": ["array", "string"]})),
         th.Property("exchange_rate", th.NumberType),
         th.Property("is_autobill_enabled", th.BooleanType),
         th.Property("inprocess_transaction_present", th.BooleanType),
@@ -1162,26 +1057,7 @@ class BillsDetailsStream(ZohoBooksStream):
         th.Property("currency_code", th.StringType),
         th.Property("currency_symbol", th.StringType),
         th.Property("currency_name_formatted", th.StringType),
-        th.Property(
-            "documents",
-            th.ArrayType(
-                th.ObjectType(
-                    th.Property("can_send_in_mail", th.BooleanType),
-                    th.Property("file_name", th.StringType),
-                    th.Property("attachment_order", th.IntegerType),
-                    th.Property("source", th.StringType),
-                    th.Property("document_id", th.StringType),
-                    th.Property("file_size", th.StringType),
-                    th.Property("source_formatted", th.StringType),
-                    th.Property("uploaded_by", th.StringType),
-                    th.Property("file_type", th.StringType),
-                    th.Property("file_size_formatted", th.StringType),
-                    th.Property("uploaded_on", th.StringType),
-                    th.Property("alter_text", th.StringType),
-                    th.Property("uploaded_on_date_formatted", th.StringType),
-                )
-            ),
-        ),
+        th.Property("documents", th.CustomType({"type": ["array", "string"]})),
         th.Property("subject_content", th.StringType),
         th.Property("price_precision", th.IntegerType),
         th.Property("exchange_rate", th.NumberType),
@@ -1195,113 +1071,7 @@ class BillsDetailsStream(ZohoBooksStream):
         th.Property("is_uber_bill", th.BooleanType),
         th.Property("is_tally_bill", th.BooleanType),
         th.Property("track_discount_in_account", th.BooleanType),
-        th.Property(
-            "line_items",
-            th.ArrayType(
-                th.ObjectType(
-                    th.Property("purchaseorder_item_id", th.StringType),
-                    th.Property("receive_item_id", th.StringType),
-                    th.Property("line_item_id", th.StringType),
-                    th.Property("item_id", th.StringType),
-                    th.Property("image_document_id", th.StringType),
-                    th.Property("sku", th.StringType),
-                    th.Property("name", th.StringType),
-                    th.Property("is_combo_product", th.BooleanType),
-                    th.Property("warehouse_id", th.StringType),
-                    th.Property("warehouse_name", th.StringType),
-                    th.Property("account_id", th.StringType),
-                    th.Property("account_name", th.StringType),
-                    th.Property("description", th.StringType),
-                    th.Property("bcy_rate", th.NumberType),
-                    th.Property("rate", th.NumberType),
-                    th.Property("sales_margin", th.StringType),
-                    th.Property("pricebook_id", th.StringType),
-                    th.Property("header_id", th.StringType),
-                    th.Property("header_name", th.StringType),
-                    th.Property(
-                        "tags",
-                        th.ArrayType(
-                            th.ObjectType(
-                                th.Property("tag_option_id", th.StringType),
-                                th.Property("is_tag_mandatory", th.BooleanType),
-                                th.Property("tag_name", th.StringType),
-                                th.Property("tag_id", th.StringType),
-                                th.Property("tag_option_name", th.StringType),
-                            )
-                        ),
-                    ),
-                    th.Property("quantity", th.IntegerType),
-                    th.Property("discount", th.NumberType),
-                    th.Property(
-                        "package_details",
-                        th.ObjectType(
-                            th.Property("length", th.StringType),
-                            th.Property("width", th.StringType),
-                            th.Property("height", th.StringType),
-                            th.Property("weight", th.StringType),
-                            th.Property("weight_unit", th.StringType),
-                            th.Property("dimension_unit", th.StringType),
-                        ),
-                    ),
-                    th.Property("markup_percent", th.NumberType),
-                    th.Property("tax_id", th.StringType),
-                    th.Property("tax_name", th.StringType),
-                    th.Property("tax_type", th.StringType),
-                    th.Property("tax_percentage", th.IntegerType),
-                    th.Property(
-                        "line_item_taxes",
-                        th.ArrayType(
-                            th.ObjectType(
-                                th.Property("tax_id", th.StringType),
-                                th.Property("tax_name", th.StringType),
-                                th.Property("tax_amount", th.NumberType),
-                            )
-                        ),
-                    ),
-                    th.Property("item_total", th.NumberType),
-                    th.Property("item_order", th.IntegerType),
-                    th.Property("unit", th.StringType),
-                    th.Property("item_type", th.StringType),
-                    th.Property("reverse_charge_tax_id", th.StringType),
-                    th.Property("image_name", th.StringType),
-                    th.Property("image_type", th.StringType),
-                    th.Property("is_billable", th.BooleanType),
-                    th.Property("customer_id", th.StringType),
-                    th.Property("customer_name", th.StringType),
-                    th.Property("project_id", th.StringType),
-                    th.Property("project_name", th.StringType),
-                    th.Property("invoice_id", th.StringType),
-                    th.Property("invoice_number", th.StringType),
-                    th.Property(
-                        "item_custom_fields",
-                        th.ArrayType(
-                            th.ObjectType(
-                                th.Property("field_id", th.StringType),
-                                th.Property("customfield_id", th.StringType),
-                                th.Property("show_in_store", th.BooleanType),
-                                th.Property("show_in_portal", th.BooleanType),
-                                th.Property("is_active", th.BooleanType),
-                                th.Property("index", th.IntegerType),
-                                th.Property("label", th.StringType),
-                                th.Property("show_on_pdf", th.BooleanType),
-                                th.Property("edit_on_portal", th.BooleanType),
-                                th.Property("edit_on_store", th.BooleanType),
-                                th.Property("api_name", th.StringType),
-                                th.Property("show_in_all_pdf", th.BooleanType),
-                                th.Property("value_formatted", th.StringType),
-                                th.Property("search_entity", th.StringType),
-                                th.Property("data_type", th.StringType),
-                                th.Property("placeholder", th.StringType),
-                                th.Property("value", th.StringType),
-                                th.Property("is_dependent_field", th.BooleanType),
-                            )
-                        ),
-                    ),
-                    th.Property("track_serial_for_receive", th.BooleanType),
-                    th.Property("track_batch_for_receive", th.BooleanType),
-                )
-            ),
-        ),
+        th.Property("line_items", th.CustomType({"type": ["array", "string"]})),
         th.Property("submitted_date", th.DateTimeType),
         th.Property("submitted_by", th.StringType),
         th.Property("submitted_by_name", th.StringType),
@@ -2034,7 +1804,8 @@ class EstimatesDetailsStream(ZohoBooksStream):
         th.Property("estimate_type", th.StringType),
         th.Property("accept_retainer", th.BooleanType),
         th.Property("retainer_percentage", th.StringType),
-        th.Property("subject_content", th.StringType)
+        th.Property("subject_content", th.StringType),
+        th.Property("line_items", th.CustomType({"type": ["array", "string"]})),
     ).to_dict()
 
 
@@ -2204,26 +1975,7 @@ class ExpensesDetailsStream(ZohoBooksStream):
         th.Property("project_name", th.StringType),
         th.Property("custom_field_hash", th.ObjectType()),
         th.Property("is_recurring_applicable", th.BooleanType),
-        th.Property(
-            "line_items",
-            th.ArrayType(
-                th.ObjectType(
-                    th.Property("line_item_id", th.StringType),
-                    th.Property("account_id", th.StringType),
-                    th.Property("account_name", th.StringType),
-                    th.Property("description", th.StringType),
-                    th.Property("tax_amount", th.NumberType),
-                    th.Property("tax_id", th.StringType),
-                    th.Property("tax_name", th.StringType),
-                    th.Property("tax_type", th.StringType),
-                    th.Property("tax_percentage", th.IntegerType),
-                    th.Property("item_total", th.NumberType),
-                    th.Property("amount", th.NumberType),
-                    th.Property("item_order", th.IntegerType),
-                    th.Property("reverse_charge_tax_id", th.StringType),
-                )
-            ),
-        ),
+        th.Property("line_items", th.CustomType({"type": ["array", "string"]})),
         th.Property("is_surcharge_applicable", th.BooleanType),
         th.Property("fcy_surcharge_amount", th.NumberType),
         th.Property("bcy_surcharge_amount", th.NumberType),
@@ -2244,4 +1996,119 @@ class ExpensesDetailsStream(ZohoBooksStream):
                 )
             ),
         ),
+    ).to_dict()
+
+
+class CreditNotesIDStream(ZohoBooksStream):
+    name = "credit_notes_id"
+    url_base = "https://www.zohoapis.com/books/v3"
+    path = "/creditnotes"
+    primary_keys = ["creditnote_id"]
+    replication_key = "last_modified_time"
+    records_jsonpath: str = "$.creditnotes[*]"
+    parent_stream_type = OrganizationIdStream
+
+    schema = th.PropertiesList(
+        th.Property("creditnote_id", th.StringType),
+        th.Property("last_modified_time", th.DateTimeType),
+    ).to_dict()
+
+    def get_child_context(self, record, context={}):
+        return {
+            "creditnote_id": record["creditnote_id"],
+            "organization_id": context.get("organization_id"),
+        }
+
+
+class CreditNoteDetailsStream(ZohoBooksStream):
+    name = "credit_notes_details"
+    url_base = "https://www.zohoapis.com/books/v3"
+    path = "/creditnotes/{creditnote_id}"
+    primary_keys = ["creditnote_id"]
+    replication_key = "last_modified_time"
+    records_jsonpath: str = "$.creditnote[*]"
+    parent_stream_type = CreditNotesIDStream
+
+    schema = th.PropertiesList(
+        th.Property("creditnote_id", th.StringType),
+        th.Property("creditnote_number", th.StringType),
+        th.Property("date", th.DateTimeType),
+        th.Property("is_pre_gst", th.BooleanType),
+        th.Property("place_of_supply", th.StringType),
+        th.Property("vat_treatment", th.StringType),
+        th.Property("vat_reg_no", th.StringType),
+        th.Property("gst_no", th.StringType),
+        th.Property("cfdi_usage", th.StringType),
+        th.Property("cfdi_reference_type", th.StringType),
+        th.Property("gst_treatment", th.StringType),
+        th.Property("tax_treatment", th.StringType),
+        th.Property("status", th.StringType),
+        th.Property("customer_id", th.StringType),
+        th.Property("customer_name", th.StringType),
+        th.Property("reference_number", th.StringType),
+        th.Property("email", th.StringType),
+        th.Property("total", th.NumberType),
+        th.Property("balance", th.NumberType),
+        th.Property("currency_code", th.StringType),
+        th.Property("currency_symbol", th.StringType),
+        th.Property("billing_address", th.ObjectType()),
+        th.Property("shipping_address", th.ObjectType()),
+        th.Property("created_time", th.DateTimeType),
+        th.Property("updated_time", th.DateTimeType),
+        th.Property("template_id", th.StringType),
+        th.Property("template_name", th.StringType),
+        th.Property("notes", th.StringType),
+        th.Property("terms", th.StringType),
+        th.Property("line_items", th.CustomType({"type": ["array", "string"]})),
+        th.Property("last_modified_time", th.DateTimeType),
+    ).to_dict()
+
+
+class VendorCreditIDSStream(ZohoBooksStream):
+    name = "vendor_credit_ids_stream"
+    path = "/vendorcredits"
+    primary_keys = ["vendorcredit_id"]
+    replication_key = "updated_time"
+    records_jsonpath: str = "$.vendorcredits[*]"
+    parent_stream_type = OrganizationIdStream
+
+    schema = th.PropertiesList(
+        th.Property("vendorcredit_id", th.StringType),
+        th.Property("updated_time", th.DateTimeType),
+    ).to_dict()
+
+    def get_child_context(self, record, context):
+        return {
+            "vendorcredit_id": record["vendorcredit_id"],
+            "organization_id": context.get("organization_id"),
+        }
+
+
+class VendorCreditDetailsStream(ZohoBooksStream):
+    name = "vendor_credit_details"
+    path = "/vendorcredits/{vendorcredit_id}"
+    primary_keys = ["vendorcredit_id"]
+    replication_key = "updated_time"
+    records_jsonpath: str = "$.vendorcredit[*]"
+    parent_stream_type = VendorCreditIDSStream
+
+    schema = th.PropertiesList(
+        th.Property("vendor_id", th.StringType),
+        th.Property("currency_id", th.StringType),
+        th.Property("vat_treatment", th.StringType),
+        th.Property("vendor_credit_number", th.StringType),
+        th.Property("gst_treatment", th.StringType),
+        th.Property("tax_treatment", th.StringType),
+        th.Property("gst_no", th.StringType),
+        th.Property("source_of_supply", th.StringType),
+        th.Property("destination_of_supply", th.StringType),
+        th.Property("place_of_supply", th.StringType),
+        th.Property("pricebook_id", th.StringType),
+        th.Property("reference_number", th.StringType),
+        th.Property("is_update_customer", th.BooleanType),
+        th.Property("date", th.DateTimeType),
+        th.Property("exchange_rate", th.NumberType),
+        th.Property("is_inclusive_tax", th.BooleanType),
+        th.Property("notes", th.StringType),
+        th.Property("line_items", th.CustomType({"type": ["array", "string"]})),
     ).to_dict()

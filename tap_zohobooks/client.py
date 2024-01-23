@@ -7,7 +7,7 @@ import urllib
 import backoff
 from memoization import cached
 from datetime import datetime, timedelta
-from requests import Response
+from requests import Response, Response as Response
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import RESTStream
 from datetime import datetime, timezone
@@ -16,9 +16,6 @@ from singer_sdk.pagination import BaseAPIPaginator
 from time import sleep
 
 from tap_zohobooks.auth import OAuth2Authenticator
-
-
-SCHEMAS_DIR = Path(__file__).parent / Path("./schemas")
 
 
 class ZohoBooksPaginator(BaseAPIPaginator):
@@ -178,3 +175,6 @@ class ZohoBooksStream(RESTStream):
             headers=self.http_headers,
             auth=self.authenticator
         )
+
+    def parse_response(self, response: Response) -> Iterable[dict]:
+        return super().parse_response(response)
