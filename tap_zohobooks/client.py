@@ -148,6 +148,10 @@ class ZohoBooksStream(RESTStream):
         return 7
 
     def validate_response(self, response: requests.Response) -> None:
+        headers = dict(response.headers)
+        if "X-Rate-Limit-Remaining" in headers:
+            if int(headers['X-Rate-Limit-Remaining']) <=0:
+                raise Exception(f"Daily API limit of {headers['X-Rate-Limit-Limit']} reached for the account.")
         if self.name in ["purchase_orders_details", "sales_orders_details", "item_details", "journals"]:
             sleep(1.01)
         if (
