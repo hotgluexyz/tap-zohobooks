@@ -2001,7 +2001,6 @@ class ExpensesDetailsStream(ZohoBooksStream):
 
 class CreditNotesIDStream(ZohoBooksStream):
     name = "credit_notes_id"
-    url_base = "https://www.zohoapis.com/books/v3"
     path = "/creditnotes"
     primary_keys = ["creditnote_id"]
     replication_key = "last_modified_time"
@@ -2018,11 +2017,16 @@ class CreditNotesIDStream(ZohoBooksStream):
             "creditnote_id": record["creditnote_id"],
             "organization_id": context.get("organization_id"),
         }
+    @property
+    def url_base(self):
+        if self._tap.config.get("accounts-server"):
+            return super(CreditNotesIDStream, self).url_base
+        else:
+            return "https://www.zohoapis.com/books/v3"
 
 
 class CreditNoteDetailsStream(ZohoBooksStream):
     name = "credit_notes_details"
-    url_base = "https://www.zohoapis.com/books/v3"
     path = "/creditnotes/{creditnote_id}"
     primary_keys = ["creditnote_id"]
     replication_key = "last_modified_time"
@@ -2062,6 +2066,13 @@ class CreditNoteDetailsStream(ZohoBooksStream):
         th.Property("line_items", th.CustomType({"type": ["array", "string"]})),
         th.Property("last_modified_time", th.DateTimeType),
     ).to_dict()
+
+    @property
+    def url_base(self):
+        if self._tap.config.get("accounts-server"):
+            return super(CreditNoteDetailsStream, self).url_base
+        else:
+            return "https://www.zohoapis.com/books/v3"
 
 
 class VendorCreditIDSStream(ZohoBooksStream):
