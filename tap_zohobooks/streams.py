@@ -2017,12 +2017,6 @@ class CreditNotesIDStream(ZohoBooksStream):
             "creditnote_id": record["creditnote_id"],
             "organization_id": context.get("organization_id"),
         }
-    @property
-    def url_base(self):
-        if self._tap.config.get("accounts-server"):
-            return super(CreditNotesIDStream, self).url_base
-        else:
-            return "https://www.zohoapis.com/books/v3"
 
 
 class CreditNoteDetailsStream(ZohoBooksStream):
@@ -2067,12 +2061,7 @@ class CreditNoteDetailsStream(ZohoBooksStream):
         th.Property("last_modified_time", th.DateTimeType),
     ).to_dict()
 
-    @property
-    def url_base(self):
-        if self._tap.config.get("accounts-server"):
-            return super(CreditNoteDetailsStream, self).url_base
-        else:
-            return "https://www.zohoapis.com/books/v3"
+
 
 
 class VendorCreditIDSStream(ZohoBooksStream):
