@@ -2112,3 +2112,53 @@ class VendorCreditDetailsStream(ZohoBooksStream):
         th.Property("notes", th.StringType),
         th.Property("line_items", th.CustomType({"type": ["array", "string"]})),
     ).to_dict()
+
+class ProfitAndLossStream(ZohoBooksStream):
+    name = "profit_and_loss"
+    path = "/reports/profitandloss"
+    primary_keys = None
+    replication_key = None
+    records_jsonpath: str = "$.profit_and_loss[*]"
+    parent_stream_type = OrganizationIdStream
+
+    schema = th.PropertiesList(
+        th.Property("total", th.NumberType),
+        th.Property("previous_values", th.CustomType({"type": ["array", "string"]})),
+        th.Property("account_transactions", th.CustomType({"type": ["array", "string"]})),
+        th.Property("name", th.StringType),
+        th.Property("previous_total", th.CustomType({"type": ["array", "string"]})),
+    ).to_dict()
+class AccountTransactionsStream(ZohoBooksStream):
+    name = "account_transactions"
+    path = "/reports/accounttransaction"
+    primary_keys = None
+    replication_key = None
+    records_jsonpath: str = "$.account_transactions[:1].account_transactions[*]"
+    parent_stream_type = OrganizationIdStream
+
+    schema = th.PropertiesList(
+        th.Property("total", th.NumberType),
+        th.Property("date", th.DateTimeType),
+        th.Property("account_name", th.StringType),
+        th.Property("transaction_details", th.StringType),
+        th.Property("transaction_id", th.StringType),
+        th.Property("reference_transaction_id", th.StringType),
+        th.Property("offset_account_id", th.StringType),
+        th.Property("offset_account_type", th.StringType),
+        th.Property("transaction_type", th.StringType),
+        th.Property("reference_number", th.StringType),
+        th.Property("entity_number", th.StringType),
+        th.Property("debit", th.CustomType({"type": ["number", "string"]})),
+        th.Property("credit", th.CustomType({"type": ["number", "string"]})),
+        th.Property("net_amount", th.StringType),
+        th.Property("contact_id", th.StringType),
+        th.Property("account_id", th.StringType),
+        th.Property("project_ids", th.StringType),
+        th.Property("currency_code", th.StringType),
+        th.Property("account", th.ObjectType(
+            th.Property("account_group", th.StringType),
+            th.Property("account_type", th.StringType),
+        )),
+        th.Property("reporting_tag", th.StringType),
+        th.Property("branch", th.CustomType({"type": ["object", "string"]})),
+    ).to_dict()
