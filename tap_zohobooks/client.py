@@ -139,6 +139,19 @@ class ZohoBooksStream(RESTStream):
             splited_start_date = start_date.split(":")
             start_date = ":".join(splited_start_date[:-1]) + splited_start_date[-1]
             params["last_modified_time"] = start_date
+        #Params for reports    
+        if self.name in ["profit_and_loss","account_transactions"]:
+            params = {}
+            if context is not None:
+                params["organization_id"] = context.get("organization_id")
+            start_date = self.config.get("reports_start_date") or self.get_starting_time(context)   
+            start_date = self._infer_date(start_date)
+            params['from_date'] = start_date.strftime("%Y-%m-%d")
+            today = datetime.now()
+            last_day_of_month = today.replace(day=1, month=today.month+1) - timedelta(days=1)
+            params['to_date'] = last_day_of_month.strftime("%Y-%m-%d")
+            if self.config.get("report_cash_based"):
+                params["cash_based"] = True
         return params
 
     def backoff_wait_generator(self) -> Generator[float, None, None]:

@@ -30,7 +30,9 @@ from tap_zohobooks.streams import (
     CreditNotesIDStream,
     CreditNoteDetailsStream,
     VendorCreditIDSStream,
-    VendorCreditDetailsStream
+    VendorCreditDetailsStream,
+    ProfitAndLossStream,
+    AccountTransactionsStream,
 )
 
 STREAM_TYPES = [
@@ -58,7 +60,9 @@ STREAM_TYPES = [
     CreditNotesIDStream,
     CreditNoteDetailsStream,
     VendorCreditIDSStream,
-    VendorCreditDetailsStream
+    VendorCreditDetailsStream,
+    ProfitAndLossStream,
+    AccountTransactionsStream,
 ]
 
 
