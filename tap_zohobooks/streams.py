@@ -2128,8 +2128,8 @@ class ProfitAndLossStream(ZohoBooksStream):
         th.Property("name", th.StringType),
         th.Property("previous_total", th.CustomType({"type": ["array", "string"]})),
     ).to_dict()
-class AccountTransactionsStream(ZohoBooksStream):
-    name = "account_transactions"
+class ReportAccountTransactionsStream(ZohoBooksStream):
+    name = "report_account_transactions"
     path = "/reports/accounttransaction"
     primary_keys = None
     replication_key = None
