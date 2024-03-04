@@ -140,7 +140,7 @@ class ZohoBooksStream(RESTStream):
             start_date = ":".join(splited_start_date[:-1]) + splited_start_date[-1]
             params["last_modified_time"] = start_date
         # Params for reports    
-        if self.name in ["profit_and_loss","account_transactions"]:
+        if self.name in ["profit_and_loss","report_account_transactions"]:
             params = {}
             if next_page_token:
                 params["page"] = next_page_token
