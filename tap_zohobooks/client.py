@@ -139,9 +139,11 @@ class ZohoBooksStream(RESTStream):
             splited_start_date = start_date.split(":")
             start_date = ":".join(splited_start_date[:-1]) + splited_start_date[-1]
             params["last_modified_time"] = start_date
-        #Params for reports    
+        # Params for reports    
         if self.name in ["profit_and_loss","account_transactions"]:
             params = {}
+            if next_page_token:
+                params["page"] = next_page_token
             if context is not None:
                 params["organization_id"] = context.get("organization_id")
             start_date = self.config.get("reports_start_date") or self.get_starting_time(context)   
