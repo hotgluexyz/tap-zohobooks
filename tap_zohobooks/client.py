@@ -140,7 +140,7 @@ class ZohoBooksStream(RESTStream):
             start_date = ":".join(splited_start_date[:-1]) + splited_start_date[-1]
             params["last_modified_time"] = start_date
         # Params for reports    
-        if self.name in ["profit_and_loss","report_account_transactions"]:
+        if self.name in ["profit_and_loss","report_account_transactions","profit_and_loss_cash_based","report_account_transactions_cash_based"]:
             params = {}
             if next_page_token:
                 params["page"] = next_page_token
@@ -152,7 +152,7 @@ class ZohoBooksStream(RESTStream):
             today = datetime.now()
             last_day_of_month = today.replace(day=1, month=today.month+1) - timedelta(days=1)
             params['to_date'] = last_day_of_month.strftime("%Y-%m-%d")
-            if self.config.get("report_cash_based"):
+            if self.name in ["profit_and_loss_cash_based","report_account_transactions_cash_based"]:
                 params["cash_based"] = True
         return params
 

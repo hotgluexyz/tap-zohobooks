@@ -2162,3 +2162,9 @@ class ReportAccountTransactionsStream(ZohoBooksStream):
         th.Property("reporting_tag", th.StringType),
         th.Property("branch", th.CustomType({"type": ["object", "string"]})),
     ).to_dict()
+
+class ProfitAndLossCashStream(ProfitAndLossStream):
+    name = "profit_and_loss_cash_based"
+
+class ReportAccountTransactionsCashStream(ReportAccountTransactionsStream):
+    name = "report_account_transactions_cash_based"
