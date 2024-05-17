@@ -2066,32 +2066,33 @@ class CreditNoteDetailsStream(ZohoBooksStream):
 class VendorCreditIDSStream(ZohoBooksStream):
     name = "vendor_credit_ids_stream"
     path = "/vendorcredits"
-    primary_keys = ["vendorcredit_id"]
-    replication_key = "updated_time"
-    records_jsonpath: str = "$.vendorcredits[*]"
+    primary_keys = ["vendor_credit_id"]
+    replication_key = "last_modified_time"
+    records_jsonpath: str = "$.vendor_credits[*]"
     parent_stream_type = OrganizationIdStream
 
     schema = th.PropertiesList(
-        th.Property("vendorcredit_id", th.StringType),
-        th.Property("updated_time", th.DateTimeType),
+        th.Property("vendor_credit_id", th.StringType),
+        th.Property("last_modified_time", th.DateTimeType),
     ).to_dict()
 
     def get_child_context(self, record, context):
         return {
-            "vendorcredit_id": record["vendorcredit_id"],
+            "vendor_credit_id": record["vendor_credit_id"],
             "organization_id": context.get("organization_id"),
         }
 
 
 class VendorCreditDetailsStream(ZohoBooksStream):
     name = "vendor_credit_details"
-    path = "/vendorcredits/{vendorcredit_id}"
-    primary_keys = ["vendorcredit_id"]
-    replication_key = "updated_time"
-    records_jsonpath: str = "$.vendorcredit[*]"
+    path = "/vendorcredits/{vendor_credit_id}"
+    primary_keys = ["vendor_credit_id"]
+    replication_key = "last_modified_time"
+    records_jsonpath: str = "$.vendor_credit[*]"
     parent_stream_type = VendorCreditIDSStream
 
     schema = th.PropertiesList(
+        th.Property("vendor_credit_id", th.StringType),
         th.Property("vendor_id", th.StringType),
         th.Property("currency_id", th.StringType),
         th.Property("vat_treatment", th.StringType),
@@ -2106,6 +2107,7 @@ class VendorCreditDetailsStream(ZohoBooksStream):
         th.Property("reference_number", th.StringType),
         th.Property("is_update_customer", th.BooleanType),
         th.Property("date", th.DateTimeType),
+        th.Property("last_modified_time", th.DateTimeType),
         th.Property("exchange_rate", th.NumberType),
         th.Property("is_inclusive_tax", th.BooleanType),
         th.Property("notes", th.StringType),
