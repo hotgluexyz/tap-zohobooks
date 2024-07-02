@@ -1,4 +1,5 @@
 """Stream type classes for tap-zohobooks."""
+from datetime import datetime
 import requests
 
 from collections import OrderedDict
@@ -2169,3 +2170,82 @@ class ProfitAndLossCashStream(ProfitAndLossStream):
 
 class ReportAccountTransactionsCashStream(ReportAccountTransactionsStream):
     name = "report_account_transactions_cash_based"
+
+class ReportAgingDetailStream(ZohoBooksStream):
+    name = "ar_aging_detail_report"
+    path = "/reports/aragingdetails"
+    primary_keys = None
+    replication_key = None
+    records_jsonpath: str = "$.invoiceaging[*]"
+    parent_stream_type = OrganizationIdStream
+
+    schema = th.PropertiesList(
+        th.Property("amount", th.NumberType),
+        th.Property("group_list", th.CustomType({"type": ["object", "array"]})),
+    ).to_dict()
+    def get_url_params(
+        self, context: Optional[dict], next_page_token: Optional[Any]
+    ) -> Dict[str, Any]:
+        params = super().get_url_params(context, next_page_token)
+        params["per_page"] = 500
+        params["sort_order"] = "A"
+        params["aging_by"] = "invoiceduedate"
+        params["interval_range"] = self.config.get("report_interval_range",15)
+        params["number_of_columns"] = self.config.get("number_of_columns", 4)
+        params["interval_type"] = self.config.get("report_interval_type", "days")
+        params["group_by"] = self.config.get("report_group_by", "none")
+        params["include_credit_notes"] = self.config.get(
+            "report_include_credit_notes", "false"
+        )
+        params["include_manual_journals"] = self.config.get(
+            "report_include_manual_journals", "false"
+        )
+        params["response_option"]  = 1
+        #@TODO apply report date ranges once we figure out parameter names
+        params["report_date"] = self.config.get("report_date",datetime.today().strftime("%Y-%m-%d"))  # noqa: F821
+        
+        if "last_modified_time" in params:
+            del params["last_modified_time"]
+        return params
+class ReportAgingSummaryStream(ZohoBooksStream):
+    name = "ar_aging_summary_report"
+    path = "/reports/aragingsummary"
+    primary_keys = None
+    replication_key = None
+    records_jsonpath: str = "$.ar_aging_summary[:1].invoiceagingsummary[*]"
+    parent_stream_type = OrganizationIdStream
+
+    schema = th.PropertiesList(
+        th.Property("customer_id", th.StringType),
+        th.Property("customer_name", th.StringType),
+        th.Property("currency_id", th.StringType),
+        th.Property("currency_code", th.StringType),
+        th.Property("current", th.NumberType),
+        th.Property("intervals", th.CustomType({"type": ["object", "array"]})),
+    ).to_dict()
+    def get_url_params(
+        self, context: Optional[dict], next_page_token: Optional[Any]
+    ) -> Dict[str, Any]:
+        params = super().get_url_params(context, next_page_token)
+        params["per_page"] = 500
+        params["sort_order"] = "A"
+        params["sort_column"] = "customer_name"
+        params["aging_by"] = "invoiceduedate"
+        params["show_by"] = "overdueamount"
+        params["group_by"] = "customer_name"
+        params["include_credit_notes"] = self.config.get(
+            "report_include_credit_notes", "false"
+        )
+        params["interval_type"] = self.config.get("report_interval_type", "days")
+        params["number_of_columns"] = self.config.get("number_of_columns", 4)
+        params["interval_range"] = self.config.get("report_interval_range", 15)
+        params["include_manual_journals"] = self.config.get(
+            "report_include_manual_journals", "false"
+        )
+        params["is_new_group_by"] = self.config.get("report_is_new_group_by", "true")
+        params["response_option"] = 1
+        #@TODO apply report date ranges once we figure out parameter names
+        params["report_date"] = self.config.get("report_date",datetime.today().strftime("%Y-%m-%d"))  # noqa: F821
+        if "last_modified_time" in params:
+            del params["last_modified_time"]
+        return params
