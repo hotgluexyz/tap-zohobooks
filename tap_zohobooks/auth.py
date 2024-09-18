@@ -88,6 +88,7 @@ class OAuth2Authenticator(APIAuthenticatorBase):
         Raises:
             RuntimeError: When OAuth login fails.
         """
+
         auth_request_payload = self.oauth_request_payload
         token_response = requests.post(self.auth_endpoint, data=auth_request_payload)
         try:

@@ -1,16 +1,13 @@
 """REST client handling, including ZohoBooksStream base class."""
 
 import requests
-from pathlib import Path
-from typing import Any, Dict, Optional, Union, List, Iterable, Generator
-import urllib
+from typing import Any, Dict, Optional, Iterable, Generator
 import backoff
 from memoization import cached
 from datetime import datetime, timedelta
 from requests import Response, Response as Response
-from singer_sdk.helpers.jsonpath import extract_jsonpath
 from singer_sdk.streams import RESTStream
-from datetime import datetime, timezone
+from datetime import datetime
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.pagination import BaseAPIPaginator
 from time import sleep
@@ -33,14 +30,14 @@ class ZohoBooksStream(RESTStream):
     """ZohoBooks stream class."""
 
     rate_limit_alert = False
+    backoff_max_tries = 5
 
-    def backoff_wait_generator(self):
-        self.logger.info("Backoff wait generator")
-        return backoff.expo(factor=2, base=3)
-
+    def backoff_wait_generator(self) -> Generator[float, None, None]:
+        return backoff.expo(base=2, factor=5, max_value=60)
+    
     def get_new_paginator(self):
         return ZohoBooksPaginator(start_value=1)
-
+    
     def _request(self, prepared_request, context={}) -> requests.Response:
         """
         Custom request function to enable us to throtle the requests,
@@ -172,12 +169,6 @@ class ZohoBooksStream(RESTStream):
                 params["cash_based"] = True
         return params
 
-    def backoff_wait_generator(self) -> Generator[float, None, None]:
-        return backoff.expo(base=2, factor=5)
-
-    def backoff_max_tries(self) -> int:
-        return 7
-
     def sleep_until_next_day(self):
         now = datetime.now()
         # Calculate the start of the next day
@@ -216,12 +207,14 @@ class ZohoBooksStream(RESTStream):
         if (
             response.status_code in self.extra_retry_statuses
             or 500 <= response.status_code < 600
+            or response.status_code == 400
         ):
             msg = self.response_error_message(response)
             raise RetriableAPIError(msg, response)
-        elif 400 <= response.status_code < 500:
+        elif 400 < response.status_code < 500:
             msg = self.response_error_message(response)
-            raise FatalAPIError(msg)
+            raise FatalAPIError(msg, response.text)
+        
 
     def _divide_chunks(self, list, limit=100):
         for i in range(0, len(list), limit):
