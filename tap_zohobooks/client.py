@@ -62,10 +62,7 @@ class ZohoBooksStream(RESTStream):
     @property
     def url_base(self) -> str:
         """Return the API URL root, configurable via tap settings."""
-        account_server = self._tap.config.get(
-            "accounts-server", "https://accounts.zoho.com"
-        )
-        account_server = account_server.replace("accounts.", "books.")
+        account_server = self.account_server.replace("accounts.", "books.")
         return f"{account_server}/api/v3"
 
     records_jsonpath = "$[*]"  # Or override `parse_response`.
@@ -82,13 +79,21 @@ class ZohoBooksStream(RESTStream):
 
     @property
     @cached
+    def account_server(self) -> str:
+        DEFAULT_ACCOUNT_SERVER = "https://accounts.zoho.com"
+        uri = self._tap.config.get("uri", DEFAULT_ACCOUNT_SERVER)
+
+        # accounts-server should come from config. if it not exists, it will try to get the uri. if it is still not present in config, pick the default value
+        account_server = self._tap.config.get("accounts-server", uri)
+        return account_server
+
+    @property
+    @cached
     def authenticator(self) -> OAuth2Authenticator:
         """Return a new authenticator object."""
-        account_server = self._tap.config.get(
-            "accounts-server", "https://accounts.zoho.com"
-        )
+
         return OAuth2Authenticator(
-            self, self._tap.config, f"{account_server}/oauth/v2/token"
+            self, self._tap.config, f"{self.account_server}/oauth/v2/token"
         )
 
     @property

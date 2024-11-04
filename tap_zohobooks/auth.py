@@ -88,16 +88,17 @@ class OAuth2Authenticator(APIAuthenticatorBase):
         Raises:
             RuntimeError: When OAuth login fails.
         """
-
         auth_request_payload = self.oauth_request_payload
         token_response = requests.post(self.auth_endpoint, data=auth_request_payload)
         try:
             token_response.raise_for_status()
             self.logger.info("OAuth authorization attempt was successful.")
             token_last_refreshed = round(datetime.utcnow().timestamp())
+            if "error" in token_response.json():
+                raise Exception
         except Exception as ex:
             raise RuntimeError(
-                f"Failed OAuth login, response was '{token_response.json()}'. {ex}"
+                f"Failed OAuth login. response={token_response.json()}. url={self.auth_endpoint}. redirect_uri={auth_request_payload['redirect_uri']}.{ex}"
             )
         token_json = token_response.json()
         self.access_token = token_json["access_token"]
