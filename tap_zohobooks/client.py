@@ -1,6 +1,6 @@
 """REST client handling, including ZohoBooksStream base class."""
 
-from functools import cached_property
+from backports.cached_property import cached_property
 import requests
 from typing import Any, Dict, Optional, Iterable, Generator
 import backoff
