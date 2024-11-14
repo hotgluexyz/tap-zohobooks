@@ -61,7 +61,7 @@ class ZohoBooksStream(RESTStream):
         return response
 
     @cached_property
-    def base_url(self) -> str:
+    def url_base(self) -> str:
         url = self.config.get("accounts-server", "https://accounts.zoho.com")
         api_url = "https://www.zohoapis.com/books/v3/"
         # Mapping domain suffixes to their corresponding base API URIs
