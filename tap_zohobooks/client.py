@@ -1,5 +1,6 @@
 """REST client handling, including ZohoBooksStream base class."""
 
+from functools import cached_property
 import requests
 from typing import Any, Dict, Optional, Iterable, Generator
 import backoff
@@ -53,17 +54,36 @@ class ZohoBooksStream(RESTStream):
             remaining_rate_limit = int(remaining_rate_limit)
             if (rate_limit - remaining_rate_limit < 500) and not self.rate_limit_alert:
                 self.logger.warning(
-                    "Rate limit is almost reached (500 requests missing)"
+                    f"Rate limit is almost reached ({rate_limit - remaining_rate_limit} requests missing)"
                 )
                 self.rate_limit_alert = True
 
         return response
 
-    @property
-    def url_base(self) -> str:
-        """Return the API URL root, configurable via tap settings."""
-        account_server = self.account_server.replace("accounts.", "books.")
-        return f"{account_server}/api/v3"
+    @cached_property
+    def base_url(self) -> str:
+        url = self.config.get("accounts-server", "https://accounts.zoho.com")
+        api_url = "https://www.zohoapis.com/books/v3/"
+        # Mapping domain suffixes to their corresponding base API URIs
+        domain_mapping = {
+            '.com': 'https://www.zohoapis.com/books/',
+            '.eu': 'https://www.zohoapis.eu/books/',
+            '.in': 'https://www.zohoapis.in/books/',
+            '.com.au': 'https://www.zohoapis.com.au/books/',
+            '.jp': 'https://www.zohoapis.jp/books/',
+            '.ca': 'https://www.zohoapis.ca/books/',
+            '.com.cn': 'https://www.zohoapis.com.cn/books/',
+            '.sa': 'https://www.zohoapis.sa/books/',
+        }
+
+        # Check for domain presence and update api_url dynamically
+        for domain, base_api_url in domain_mapping.items():
+            if domain in url:
+                api_url = base_api_url + 'v3/'  # Append '/v3/' to the base URL
+                break  # Stop checking further domains if found
+
+        return api_url
+
 
     records_jsonpath = "$[*]"  # Or override `parse_response`.
 
