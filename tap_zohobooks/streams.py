@@ -2251,3 +2251,23 @@ class ReportAgingSummaryStream(ZohoBooksStream):
         if "last_modified_time" in params:
             del params["last_modified_time"]
         return params
+
+class CurrencyStream(ZohoBooksStream):
+    name = "currencies"
+    path = "/settings/currencies"
+    replication_key = None
+    primary_keys = ["currency_id"]
+    records_jsonpath: str = "$.currencies[*]"
+
+    schema = th.PropertiesList(
+        th.Property("currency_id", th.StringType),
+        th.Property("currency_code", th.StringType),
+        th.Property("currency_name", th.StringType),
+        th.Property("currency_name_formatted", th.StringType),
+        th.Property("currency_symbol", th.StringType),
+        th.Property("price_precision", th.IntegerType),
+        th.Property("currency_format", th.StringType),
+        th.Property("is_base_currency", th.BooleanType),
+        th.Property("exchange_rate", th.NumberType),
+        th.Property("effective_date", th.DateTimeType),
+    ).to_dict()
