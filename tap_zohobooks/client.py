@@ -78,7 +78,7 @@ class ZohoBooksStream(RESTStream):
 
         # Check for domain presence and update api_url dynamically
         for domain, base_api_url in domain_mapping.items():
-            if domain in url:
+            if url.endswith(domain):
                 api_url = base_api_url + 'v3/'  # Append '/v3/' to the base URL
                 break  # Stop checking further domains if found
 
