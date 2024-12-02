@@ -12,6 +12,7 @@ from datetime import datetime
 from singer_sdk.exceptions import FatalAPIError, RetriableAPIError
 from singer_sdk.pagination import BaseAPIPaginator
 from time import sleep
+from calendar import monthrange
 
 from tap_zohobooks.auth import OAuth2Authenticator
 
@@ -183,9 +184,8 @@ class ZohoBooksStream(RESTStream):
             start_date = self._infer_date(start_date)
             params["from_date"] = start_date.strftime("%Y-%m-%d")
             today = datetime.now()
-            last_day_of_month = today.replace(day=1, month=today.month + 1) - timedelta(
-                days=1
-            )
+            _, last_day = monthrange(today.year, today.month)
+            last_day_of_month = today.replace(day=last_day)
             params["to_date"] = last_day_of_month.strftime("%Y-%m-%d")
             if self.name in [
                 "profit_and_loss_cash_based",
