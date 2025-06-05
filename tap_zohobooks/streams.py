@@ -587,6 +587,24 @@ class InvoicesStream(ZohoBooksStream):
             "invoice_id": record["invoice_id"],
             "organization_id": context.get("organization_id"),
         }
+    
+    def get_records(self, context):
+        """
+        Need to overwrite the get_records because zoho sometimes returns duplicates
+        for each unique invoice_url you generate
+        """
+        seen_ids = set()
+        for record in self.request_records(context):
+            transformed_record = self.post_process(record, context)
+
+            if transformed_record is None:
+                # Record filtered out during post_process()
+                continue
+            invoice_id = transformed_record.get("invoice_id")
+            if invoice_id in seen_ids:
+                continue
+            seen_ids.add(invoice_id)
+            yield transformed_record
 
 
 class InvoiceDetailsStream(ZohoBooksStream):
