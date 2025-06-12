@@ -259,3 +259,12 @@ class ZohoBooksStream(RESTStream):
 
     def parse_response(self, response: Response) -> Iterable[dict]:
         return super().parse_response(response)
+
+    def post_process(self, row: dict, context=None):
+        for key, value in row.items():
+            field_types = self.schema.get("properties", {}).get(key, {}).get("type")
+            if not field_types:
+                continue
+            if ('number' in field_types or 'integer' in field_types) and value == "":
+                row[key] = None
+        return row
