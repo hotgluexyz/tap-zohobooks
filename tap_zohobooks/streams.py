@@ -558,8 +558,8 @@ class InvoicesStream(ZohoBooksStream):
         th.Property("created_by", th.StringType),
         th.Property("updated_time", th.StringType),
         th.Property("transaction_type", th.StringType),
-        th.Property("total", th.CustomType({"type": ["number", "string"]})),
-        th.Property("balance", th.CustomType({"type": ["number", "string"]})),
+        th.Property("total", th.StringType),
+        th.Property("balance", th.StringType),
         th.Property("created_time", th.DateTimeType),
         th.Property("last_modified_time", th.DateTimeType),
         th.Property("is_emailed", th.BooleanType),
@@ -576,10 +576,10 @@ class InvoicesStream(ZohoBooksStream):
         th.Property("documents", th.StringType),
         th.Property("salesperson_id", th.StringType),
         th.Property("salesperson_name", th.StringType),
-        th.Property("shipping_charge", th.CustomType({"type": ["number", "string"]})),
-        th.Property("adjustment", th.CustomType({"type": ["number", "string"]})),
-        th.Property("write_off_amount", th.CustomType({"type": ["number", "string"]})),
-        th.Property("exchange_rate", th.CustomType({"type": ["number", "string"]})),
+        th.Property("shipping_charge", th.StringType),
+        th.Property("adjustment", th.NumberType),
+        th.Property("write_off_amount", th.NumberType),
+        th.Property("exchange_rate", th.NumberType),
     ).to_dict()
 
     def get_child_context(self, record, context) -> dict:
@@ -692,7 +692,7 @@ class InvoiceDetailsStream(ZohoBooksStream):
                     th.Property("search_entity", th.StringType),
                     th.Property("data_type", th.StringType),
                     th.Property("placeholder", th.StringType),
-                    th.Property("value", th.CustomType({"type": ["number", "string"]})),
+                    th.Property("value", th.StringType),
                     th.Property("is_dependent_field", th.BooleanType),
                 )
             ),
