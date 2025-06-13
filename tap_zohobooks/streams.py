@@ -1861,10 +1861,10 @@ class AccountTransactionsStream(ZohoBooksStream):
         th.Property("debit_or_credit", th.StringType),
         th.Property("offset_account_name", th.StringType),
         th.Property("reference_number", th.StringType),
-        th.Property("credit_amount", th.CustomType({"type": ["number", "string"]})),
+        th.Property("credit_amount", th.NumberType),
         th.Property("fcy_credit_amount", th.CustomType({"type": ["number", "string"]})),
         th.Property("fcy_debit_amount", th.CustomType({"type": ["number", "string"]})),
-        th.Property("debit_amount", th.CustomType({"type": ["number", "string"]})),
+        th.Property("debit_amount", th.StringType),
     ).to_dict()
 
 
