@@ -264,7 +264,14 @@ class ZohoBooksStream(RESTStream):
         for key, value in row.items():
             field_types = self.schema.get("properties", {}).get(key, {}).get("type")
             if not field_types:
-                continue
+                continue   
+            
+            # Handle number/integer fields with empty strings
             if ('number' in field_types or 'integer' in field_types) and value == "":
                 row[key] = None
+            
+            # Handle string fields with non-string values
+            elif 'string' in field_types and value is not None and not isinstance(value, str):
+                row[key] = str(value)
+                
         return row
