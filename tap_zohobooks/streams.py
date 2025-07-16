@@ -1,5 +1,6 @@
 """Stream type classes for tap-zohobooks."""
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import requests
 
 from collections import OrderedDict
@@ -11,6 +12,11 @@ from singer_sdk import typing as th  # JSON Schema typing helpers
 from singer_sdk.helpers.jsonpath import extract_jsonpath
 from tap_zohobooks.client import ZohoBooksStream
 
+from singer_sdk.pagination import (
+    BaseAPIPaginator,
+    LegacyStreamPaginator,
+)
+from dateutil.parser import parse
 
 class OrganizationIdStream(ZohoBooksStream):
     name = "organization_id"
@@ -2208,16 +2214,67 @@ class ReportAgingDetailStream(ZohoBooksStream):
     replication_key = None
     records_jsonpath: str = "$.invoiceaging[*]"
     parent_stream_type = OrganizationIdStream
+    paginate = True
+    page = 1
+    current_report_date = None
 
     schema = th.PropertiesList(
         th.Property("amount", th.NumberType),
         th.Property("group_list", th.CustomType({"type": ["object", "array"]})),
+        th.Property("report_date", th.DateType),
     ).to_dict()
+    def get_report_date(self):
+        report_date = None
+        if self.config.get("report_date"):
+            report_date = parse(self.config.get("report_date")).strftime("%Y-%m-%d")
+        return report_date or  datetime.today().strftime("%Y-%m-%d")
+    
+    def get_next_page_token(
+        self, response: requests.Response, previous_token: Optional[Any]
+    ) -> Optional[Any]:
+        """
+            This is used to request reports on monthly basis 
+            and then iterate through monthly report until end date or today's date is reached.
+        """
+        if self.paginate:
+            self.page += 1
+            has_more = response.json().get("page_context", {}).get("has_more_page", False)
+            if has_more:
+                # Update the previous token if it exists
+                if previous_token:
+                    previous_token = previous_token["token"]
+                else:
+                    previous_token = self.get_report_date()    
+                # Return the next page token and the updated skip value
+                return {"token": previous_token, "page": self.page}
+            else:
+                self.page = 1
+                today = datetime.today()
+                if self.config.get("report_end_date"):
+                    today = parse(self.config.get("report_end_date"))
+                if previous_token:
+                    start_date = parse(previous_token["token"]) + relativedelta(months=1)
+                else:
+                    #This is the first run and we need to send date for next iteration
+                    start_date = parse(self.get_report_date()) + relativedelta(months=1)
+                next_token = start_date.replace(tzinfo=None)
+                # Disable pagination if the next token's date is in the future
+                if self.is_difference_le_0_months(today, next_token):
+                    self.paginate = False
+                return {"token": next_token.strftime("%Y-%m-%d"), "page": 1}    
+        else:
+            return None 
+         
     def get_url_params(
         self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Dict[str, Any]:
         params = super().get_url_params(context, next_page_token)
+        report_date = None
+        page = 1
+        if next_page_token:
+            report_date, page = next_page_token["token"], next_page_token["page"]
         params["per_page"] = 500
+        params["page"] = page
         params["sort_order"] = "A"
         params["aging_by"] = "invoiceduedate"
         params["interval_range"] = self.config.get("report_interval_range",15)
@@ -2232,12 +2289,20 @@ class ReportAgingDetailStream(ZohoBooksStream):
         )
         params["response_option"]  = 1
         #@TODO apply report date ranges once we figure out parameter names
-        params["report_date"] = self.config.get("report_date",datetime.today().strftime("%Y-%m-%d"))  # noqa: F821
-        
+        params["report_date"] = report_date or self.get_report_date()  # noqa: F821
+        self.current_report_date = params["report_date"]
         if "last_modified_time" in params:
             del params["last_modified_time"]
         return params
-class ReportAgingSummaryStream(ZohoBooksStream):
+    def get_new_paginator(self) -> BaseAPIPaginator:
+        return LegacyStreamPaginator(self)  # type: ignore
+    def is_difference_le_0_months(self,date1, date2):
+        return (date1.year == date2.year and date1.month == date2.month) or (date1 < date2)       
+    def post_process(self, row: dict, context: Optional[dict] = None) -> Optional[dict]:
+        row['report_date'] = self.current_report_date
+        return row
+    
+class ReportAgingSummaryStream(ReportAgingDetailStream):
     name = "ar_aging_summary_report"
     path = "/reports/aragingsummary"
     primary_keys = None
@@ -2252,12 +2317,19 @@ class ReportAgingSummaryStream(ZohoBooksStream):
         th.Property("currency_code", th.StringType),
         th.Property("current", th.NumberType),
         th.Property("intervals", th.CustomType({"type": ["object", "array"]})),
+        th.Property("report_date", th.DateType),
     ).to_dict()
     def get_url_params(
         self, context: Optional[dict], next_page_token: Optional[Any]
     ) -> Dict[str, Any]:
-        params = super().get_url_params(context, next_page_token)
+        params = {}
+        params["organization_id"] = context.get("organization_id")
+        report_date = None
+        page = 1
+        if next_page_token:
+            report_date, page = next_page_token["token"], next_page_token["page"]
         params["per_page"] = 500
+        params["page"] = page
         params["sort_order"] = "A"
         params["sort_column"] = "customer_name"
         params["aging_by"] = "invoiceduedate"
@@ -2275,7 +2347,8 @@ class ReportAgingSummaryStream(ZohoBooksStream):
         params["is_new_group_by"] = self.config.get("report_is_new_group_by", "true")
         params["response_option"] = 1
         #@TODO apply report date ranges once we figure out parameter names
-        params["report_date"] = self.config.get("report_date",datetime.today().strftime("%Y-%m-%d"))  # noqa: F821
+        params["report_date"] = report_date or self.get_report_date()  # noqa: F821
+        self.current_report_date = params["report_date"]
         if "last_modified_time" in params:
             del params["last_modified_time"]
         return params
