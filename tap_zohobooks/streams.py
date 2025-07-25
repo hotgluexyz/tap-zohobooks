@@ -1869,8 +1869,8 @@ class AccountTransactionsStream(ZohoBooksStream):
 
     def post_process(self, record, context):
         """
-        Need to overwrite the post_process because zoho sometimes returns duplicates
-        for each unique invoice_url you generate
+        Need to overwrite the post_process because zoho sometimes returns transactions
+        without a transaction_id, and it fails on export.
         """
         # only return records with a transaction_id
         if record.get("transaction_id"):
