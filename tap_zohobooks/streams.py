@@ -1867,6 +1867,15 @@ class AccountTransactionsStream(ZohoBooksStream):
         th.Property("debit_amount", th.CustomType({"type": ["number", "string"]})),
     ).to_dict()
 
+    def post_process(self, record, context):
+        """
+        Need to overwrite the post_process because zoho sometimes returns transactions
+        without a transaction_id, and it fails on export.
+        """
+        # only return records with a transaction_id
+        if record.get("transaction_id"):
+            return record
+
 
 class ExpensesStream(ZohoBooksStream):
     name = "expenses"
