@@ -1872,8 +1872,9 @@ class AccountTransactionsStream(ZohoBooksStream):
         Need to overwrite the post_process because zoho sometimes returns transactions
         without a transaction_id, and it fails on export.
         """
-        # only return records with a transaction_id
-        if record.get("transaction_id"):
+        record = super().post_process(record, context)
+        
+        if record and record.get("transaction_id"):
             return record
 
 
