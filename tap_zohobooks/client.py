@@ -239,6 +239,8 @@ class ZohoBooksStream(RESTStream):
         elif 400 < response.status_code < 500:
             msg = self.response_error_message(response)
             raise FatalAPIError(msg, response.text)
+        elif response.status_code == 200 and len(response.text.strip()) == 0:
+            raise RetriableAPIError("Empty response", response)
         
 
     def _divide_chunks(self, list, limit=100):
