@@ -249,7 +249,7 @@ class ZohoBooksStream(RESTStream):
             raise FatalAPIError(msg, response.text)
         elif response.status_code == 200 and not self.is_valid_json(response.text):
             self.logger.error("Received a non-json response", extra={"response": response.text})
-            raise FatalAPIError("Empty response", response.text)
+            raise RetriableAPIError("Empty response", response.text)
 
     def _divide_chunks(self, list, limit=100):
         for i in range(0, len(list), limit):
