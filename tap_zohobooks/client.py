@@ -26,6 +26,8 @@ class ZohoBooksPaginator(BaseAPIPaginator):
 
     def has_more(self, response: Response) -> bool:
         """Return True if there are more pages available."""
+        if response.text == "" and response.status_code == 200:
+            return False
         return response.json().get("page_context", {}).get("has_more_page", False)
 
 
@@ -271,3 +273,4 @@ class ZohoBooksStream(RESTStream):
             # Skip empty responses
             return []
         return super().parse_response(response)
+
