@@ -27,6 +27,9 @@ class ZohoBooksPaginator(BaseAPIPaginator):
     def has_more(self, response: Response) -> bool:
         """Return True if there are more pages available."""
 
+        if response.text == "" and response.status_code == 200:
+            return False
+
         return response.json().get("page_context", {}).get("has_more_page", False)
 
 
@@ -34,7 +37,7 @@ class ZohoBooksStream(RESTStream):
     """ZohoBooks stream class."""
 
     rate_limit_alert = False
-    backoff_max_tries = 10
+    backoff_max_tries = 5
 
     def backoff_wait_generator(self) -> Generator[float, None, None]:
         return backoff.expo(base=4, factor=5, max_value=180)
@@ -250,9 +253,7 @@ class ZohoBooksStream(RESTStream):
             raise FatalAPIError(msg, response.text)
         elif response.status_code == 200 and not self.is_valid_json(response.text):
             self.logger.error(f"Received a non-json response: {response.text}")
-            raise RetriableAPIError("Received a non-json response", response)
 
-        
 
     def _divide_chunks(self, list, limit=100):
         for i in range(0, len(list), limit):
