@@ -1841,9 +1841,22 @@ class AccountTransactionsStream(ZohoBooksStream):
     name = "account_transactions"
     path = "/chartofaccounts/transactions"
     primary_keys = ["transaction_id","account_id"]
-    replication_key = "transaction_date"
     records_jsonpath: str = "$.transactions[*]"
     parent_stream_type = ChartOfAccountsStream
+
+    @property
+    def replication_key(self):
+        if self.config.get("full_sync_account_transactions", True):
+            return None
+        else:
+            return "transaction_date"
+    
+    @replication_key.setter
+    def replication_key(self, value):
+        if self.config.get("full_sync_account_transactions", True):
+            self._replication_key = None
+        else:
+            self._replication_key = "transaction_date"
 
     schema = th.PropertiesList(
         th.Property("transaction_id", th.StringType),
