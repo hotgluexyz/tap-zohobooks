@@ -155,7 +155,7 @@ class ZohoBooksStream(RESTStream):
             params["page"] = next_page_token
 
         rep_key_value = self.get_starting_time(context)
-        if rep_key_value is not None:
+        if rep_key_value is not None and not self.config.get(f"full_sync_{self.name}"):
             start_date = self._infer_date(rep_key_value)
             start_date = start_date + timedelta(seconds=1)
 
