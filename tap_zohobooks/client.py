@@ -226,9 +226,13 @@ class ZohoBooksStream(RESTStream):
                     f"Daily API limit of {headers['X-Rate-Limit-Remaining']} reached for the account. Triggering sleep."
                 )
                 self.logger.info(f"Limit reached with headers: {headers}")
-                # TODO once above log is reached check if limit-reset header is present and implement it
-                # Daily limit reached sleep till next day
-                self.sleep_until_next_day()
+                rate_limit_reset_time = headers.get("X-Rate-Limit-Reset")
+                if rate_limit_reset_time:
+                    self.logger.info(f"Sleeping for {rate_limit_reset_time} seconds until the next rate limit reset.")
+                    sleep(int(rate_limit_reset_time))
+                else:
+                    self.logger.info("Daily API limit reached but Rate limit reset time not found in headers, sleeping until next day.")
+                    self.sleep_until_next_day()
 
         if self.name in [
             "purchase_orders_details",
