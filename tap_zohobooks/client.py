@@ -16,6 +16,8 @@ from time import sleep
 from calendar import monthrange
 
 from tap_zohobooks.auth import OAuth2Authenticator
+from singer_sdk import metrics
+from typing import Union
 
 
 class ZohoBooksPaginator(BaseAPIPaginator):
@@ -273,3 +275,26 @@ class ZohoBooksStream(RESTStream):
 
     def parse_response(self, response: Response) -> Iterable[dict]:
         return super().parse_response(response)
+
+    def make_request(self, context: Union[dict, None], next_page_token: Optional[Any] = None) -> Iterable[dict]:
+        prepared_request = self.prepare_request(
+            context,
+            next_page_token=next_page_token,
+        )
+        resp = self._request(prepared_request, context)
+        return prepared_request, resp
+
+    def request_records(self, context: Union[dict, None]) -> Iterable[dict]:
+        paginator = self.get_new_paginator()
+        decorated_request = self.request_decorator(self.make_request)
+
+        with metrics.http_request_counter(self.name, self.path) as request_counter:
+            request_counter.context = context
+
+            while not paginator.finished:
+                prepared_request, resp = decorated_request(context, paginator.current_value)
+                request_counter.increment()
+                self.update_sync_costs(prepared_request, resp, context)
+                yield from self.parse_response(resp)
+
+                paginator.advance(resp)
