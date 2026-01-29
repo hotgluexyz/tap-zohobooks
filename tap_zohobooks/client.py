@@ -156,9 +156,6 @@ class ZohoBooksStream(RESTStream):
         if next_page_token:
             params["page"] = next_page_token
 
-        if self.name == "chart_of_accounts":
-            return params
-
         rep_key_value = self.get_starting_time(context)
         if rep_key_value is not None and not self.config.get(f"full_sync_{self.name}"):
             start_date = self._infer_date(rep_key_value)
