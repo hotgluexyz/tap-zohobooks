@@ -45,7 +45,7 @@ class ZohoBooksStream(RESTStream):
         return ZohoBooksPaginator(start_value=1)
 
     @property
-    def timeout(self) -> int:
+    def timeout(self) -> tuple[int, int]:
         """Return the request timeout limit in seconds."""
         return (180, 300)  # 180 seconds to make connection, 300 seconds to read the response
     
