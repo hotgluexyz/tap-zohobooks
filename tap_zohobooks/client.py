@@ -44,21 +44,13 @@ class ZohoBooksStream(RESTStream):
     def get_new_paginator(self):
         return ZohoBooksPaginator(start_value=1)
 
-    @property
-    def timeout(self) -> tuple[int, int]:
-        """Return the request timeout limit in seconds."""
-        return (180, 300)  # 180 seconds to make connection, 300 seconds to read the response
     
     def _request(self, prepared_request, context={}) -> requests.Response:
         """
         Custom request function to enable us to throtle the requests,
         distributing them equaly during the runtime.
         """
-        try: 
-            response = super()._request(prepared_request, context=context)
-        except requests.exceptions.ConnectTimeout as e:
-            msg = f"Connection timeout: {str(e)}"
-            raise RetriableAPIError(msg) from e
+        response = super()._request(prepared_request, context=context)
         rate_limit = response.headers.get("X-Rate-Limit-Limit")
         remaining_rate_limit = response.headers.get("X-Rate-Limit-Remaining")
         if rate_limit and remaining_rate_limit:
@@ -308,3 +300,36 @@ class ZohoBooksStream(RESTStream):
                 yield from self.parse_response(resp)
 
                 paginator.advance(resp)
+
+    @property
+    def timeout(self) -> tuple[int, int]:
+        """Return the request timeout limit in seconds."""
+        return (180, 300)  # 180 seconds to make connection, 300 seconds to read the response
+
+    def request_decorator(self, func: Callable) -> Callable:
+        """Instantiate a decorator for handling request failures.
+
+        Uses a wait generator defined in `backoff_wait_generator` to
+        determine backoff behaviour. Try limit is defined in
+        `backoff_max_tries`, and will trigger the event defined in
+        `backoff_handler` before retrying. Developers may override one or
+        all of these methods to provide custom backoff or retry handling.
+
+        Args:
+            func: Function to decorate.
+
+        Returns:
+            A decorated method.
+        """
+        decorator: Callable = backoff.on_exception(
+            self.backoff_wait_generator,
+            (
+                RetriableAPIError,
+                requests.exceptions.ReadTimeout,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.ConnectTimeout,
+            ),
+            max_tries=self.backoff_max_tries,
+            on_backoff=self.backoff_handler,
+        )(func)
+        return decorator
