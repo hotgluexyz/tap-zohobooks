@@ -43,13 +43,23 @@ class ZohoBooksStream(RESTStream):
     
     def get_new_paginator(self):
         return ZohoBooksPaginator(start_value=1)
+
+    @property
+    def timeout(self) -> int:
+        """Return the request timeout limit in seconds."""
+        return (180, 300)  # 180 seconds to make connection, 300 seconds to read the response
     
     def _request(self, prepared_request, context={}) -> requests.Response:
         """
         Custom request function to enable us to throtle the requests,
         distributing them equaly during the runtime.
         """
-        response = super()._request(prepared_request, context=context)
+        try: 
+            response = super()._request(prepared_request, context=context)
+        except requests.exceptions.ConnectTimeout as e:
+            # Convert ConnectTimeout to RetriableAPIError so it gets retried
+            msg = f"Connection timeout: {str(e)}"
+            raise RetriableAPIError(msg) from e
         rate_limit = response.headers.get("X-Rate-Limit-Limit")
         remaining_rate_limit = response.headers.get("X-Rate-Limit-Remaining")
         if rate_limit and remaining_rate_limit:
