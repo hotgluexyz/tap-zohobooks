@@ -57,7 +57,6 @@ class ZohoBooksStream(RESTStream):
         try: 
             response = super()._request(prepared_request, context=context)
         except requests.exceptions.ConnectTimeout as e:
-            # Convert ConnectTimeout to RetriableAPIError so it gets retried
             msg = f"Connection timeout: {str(e)}"
             raise RetriableAPIError(msg) from e
         rate_limit = response.headers.get("X-Rate-Limit-Limit")
