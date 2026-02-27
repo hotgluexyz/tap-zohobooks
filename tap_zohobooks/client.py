@@ -3,7 +3,7 @@
 import json
 from backports.cached_property import cached_property
 import requests
-from typing import Any, Dict, Optional, Iterable, Generator
+from typing import Any, Dict, Optional, Iterable, Generator, Callable
 import backoff
 from memoization import cached
 from datetime import datetime, timedelta
