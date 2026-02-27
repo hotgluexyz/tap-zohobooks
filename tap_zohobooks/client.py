@@ -43,7 +43,6 @@ class ZohoBooksStream(RESTStream):
     
     def get_new_paginator(self):
         return ZohoBooksPaginator(start_value=1)
-
     
     def _request(self, prepared_request, context={}) -> requests.Response:
         """
