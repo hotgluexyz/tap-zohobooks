@@ -35,7 +35,7 @@ class ZohoBooksStream(RESTStream):
     """ZohoBooks stream class."""
 
     rate_limit_alert = False
-    backoff_max_tries = 5
+    backoff_max_tries = 8
     ignore_config_start_date = False
 
     def backoff_wait_generator(self) -> Generator[float, None, None]:
