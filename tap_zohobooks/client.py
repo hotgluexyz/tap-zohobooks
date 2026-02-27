@@ -3,7 +3,7 @@
 import json
 from backports.cached_property import cached_property
 import requests
-from typing import Any, Dict, Optional, Iterable, Generator, Callable
+from typing import Any, Dict, Optional, Iterable, Generator
 import backoff
 from memoization import cached
 from datetime import datetime, timedelta
@@ -35,7 +35,7 @@ class ZohoBooksStream(RESTStream):
     """ZohoBooks stream class."""
 
     rate_limit_alert = False
-    backoff_max_tries = 5
+    backoff_max_tries = 8
     ignore_config_start_date = False
 
     def backoff_wait_generator(self) -> Generator[float, None, None]:
@@ -299,36 +299,3 @@ class ZohoBooksStream(RESTStream):
                 yield from self.parse_response(resp)
 
                 paginator.advance(resp)
-
-    @property
-    def timeout(self) -> tuple[int, int]:
-        """Return the request timeout limit in seconds."""
-        return (180, 300)  # 180 seconds to make connection, 300 seconds to read the response
-
-    def request_decorator(self, func: Callable) -> Callable:
-        """Instantiate a decorator for handling request failures.
-
-        Uses a wait generator defined in `backoff_wait_generator` to
-        determine backoff behaviour. Try limit is defined in
-        `backoff_max_tries`, and will trigger the event defined in
-        `backoff_handler` before retrying. Developers may override one or
-        all of these methods to provide custom backoff or retry handling.
-
-        Args:
-            func: Function to decorate.
-
-        Returns:
-            A decorated method.
-        """
-        decorator: Callable = backoff.on_exception(
-            self.backoff_wait_generator,
-            (
-                RetriableAPIError,
-                requests.exceptions.ReadTimeout,
-                requests.exceptions.ConnectionError,
-                requests.exceptions.ConnectTimeout,
-            ),
-            max_tries=self.backoff_max_tries,
-            on_backoff=self.backoff_handler,
-        )(func)
-        return decorator
