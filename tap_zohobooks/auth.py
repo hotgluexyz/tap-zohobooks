@@ -89,7 +89,7 @@ class OAuth2Authenticator(APIAuthenticatorBase):
             RuntimeError: When OAuth login fails.
         """
         auth_request_payload = self.oauth_request_payload
-        self.logger.debug(f"OAuth token refresh starting: endpoint={self.auth_endpoint}")
+        self.logger.debug(f"OAuth token refresh starting")
         token_response = requests.post(self.auth_endpoint, data=auth_request_payload)
         self.logger.debug("OAuth token refresh completed")
         try:
