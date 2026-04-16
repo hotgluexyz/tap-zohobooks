@@ -55,7 +55,7 @@ class ZohoBooksStream(RESTStream):
         rate_limit = response.headers.get("X-Rate-Limit-Limit")
         remaining_rate_limit = response.headers.get("X-Rate-Limit-Remaining")
         if rate_limit and remaining_rate_limit:
-            # adds cooldown between requests (Rate limit is 30 requests per minute)
+            self.logger.debug(f"Rate limit throttle: sleeping 2s (remaining={remaining_rate_limit}/{rate_limit})")
             sleep(2)
             rate_limit = int(rate_limit)
             remaining_rate_limit = int(remaining_rate_limit)
@@ -245,6 +245,7 @@ class ZohoBooksStream(RESTStream):
             "item_details",
             "journals",
         ]:
+            self.logger.debug(f"Detail stream throttle: sleeping 1.01s for {self.name}")
             sleep(1.01)
         if (
             response.status_code in self.extra_retry_statuses
@@ -290,16 +291,17 @@ class ZohoBooksStream(RESTStream):
     def request_records(self, context: Union[dict, None]) -> Iterable[dict]:
         paginator = self.get_new_paginator()
         decorated_request = self.request_decorator(self.make_request)
+        self.logger.debug(f"Starting stream: stream={self.name}")
 
         with metrics.http_request_counter(self.name, self.path) as request_counter:
             request_counter.context = context
 
             while not paginator.finished:
-                self.logger.debug(f"Fetching page: stream={self.name} page={paginator.current_value} context={context}")
+                self.logger.debug(f"Fetching page: stream={self.name} page={paginator.current_value}")
                 prepared_request, resp = decorated_request(context, paginator.current_value)
                 request_counter.increment()
                 self.update_sync_costs(prepared_request, resp, context)
                 yield from self.parse_response(resp)
 
                 paginator.advance(resp)
-        self.logger.debug(f"Stream pagination complete: stream={self.name}")
+        self.logger.info(f"Stream complete: stream={self.name}")
