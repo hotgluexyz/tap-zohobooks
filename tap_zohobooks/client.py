@@ -49,7 +49,9 @@ class ZohoBooksStream(RESTStream):
         Custom request function to enable us to throtle the requests,
         distributing them equaly during the runtime.
         """
+        self.logger.debug(f"HTTP request starting: stream={self.name} url={prepared_request.url}")
         response = super()._request(prepared_request, context=context)
+        self.logger.debug(f"HTTP request completed: stream={self.name} status={response.status_code}")
         rate_limit = response.headers.get("X-Rate-Limit-Limit")
         remaining_rate_limit = response.headers.get("X-Rate-Limit-Remaining")
         if rate_limit and remaining_rate_limit:
@@ -293,9 +295,11 @@ class ZohoBooksStream(RESTStream):
             request_counter.context = context
 
             while not paginator.finished:
+                self.logger.debug(f"Fetching page: stream={self.name} page={paginator.current_value} context={context}")
                 prepared_request, resp = decorated_request(context, paginator.current_value)
                 request_counter.increment()
                 self.update_sync_costs(prepared_request, resp, context)
                 yield from self.parse_response(resp)
 
                 paginator.advance(resp)
+        self.logger.debug(f"Stream pagination complete: stream={self.name}")
