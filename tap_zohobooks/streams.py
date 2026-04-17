@@ -336,6 +336,7 @@ class ItemsStream(ZohoBooksStream):
             yield from super().parse_response(response)
             return
 
+        self.logger.debug("use_item_details enabled: fetching item details")
         # gets organization id from the url
         org_id = response.url.replace(
             self.url_base + "/items?", ""
@@ -345,9 +346,13 @@ class ItemsStream(ZohoBooksStream):
 
         # get all item ids from the records and create a dict with it
         record_ids = OrderedDict((record.get("item_id"), record) for record in records)
+        self.logger.debug(f"use_item_details: {len(record_ids)} items to fetch details for")
 
         # chunks the request, preserving API quota
+        chunk_num = 0
         for chunk in self._divide_chunks(list(record_ids.keys())):
+            chunk_num += 1
+            self.logger.debug(f"use_item_details: fetching chunk {chunk_num} ({len(chunk)} items)")
             params = {
                 "organization_id": org_id,
                 "item_ids": ",".join(chunk)
@@ -360,6 +365,7 @@ class ItemsStream(ZohoBooksStream):
                 headers=self.authenticator.auth_headers
             )
             detail_response = self._request(req.prepare())
+            self.logger.debug(f"use_item_details: chunk {chunk_num} response received")
 
             item_details = extract_jsonpath(self.records_jsonpath, input=detail_response.json())
 
@@ -1287,6 +1293,7 @@ class SalesOrdersStream(ZohoBooksStream):
             yield from super().parse_response(response)
             return
 
+        self.logger.debug("use_sales_details enabled: fetching sales order details")
         # gets organization id from the url
         org_id = response.url.replace(
             self.url_base + "/salesorders?", ""
@@ -1296,9 +1303,13 @@ class SalesOrdersStream(ZohoBooksStream):
 
         # get all item ids from the records and create a dict with it
         record_ids = OrderedDict((record.get("salesorder_id"), record) for record in records)
+        self.logger.debug(f"use_sales_details: {len(record_ids)} sales orders to fetch details for")
 
         # chunks the request, preserving API quota
+        chunk_num = 0
         for chunk in self._divide_chunks(list(record_ids.keys())):
+            chunk_num += 1
+            self.logger.debug(f"use_sales_details: fetching chunk {chunk_num} ({len(chunk)} orders)")
             params = {
                 "organization_id": org_id,
                 "salesorder_ids": ",".join(chunk)
@@ -1310,6 +1321,7 @@ class SalesOrdersStream(ZohoBooksStream):
                 headers=self.authenticator.auth_headers
             )
             detail_response = self._request(req.prepare())
+            self.logger.debug(f"use_sales_details: chunk {chunk_num} response received")
 
             sales_details = extract_jsonpath(self.records_jsonpath, input=detail_response.json())
 
