@@ -117,6 +117,11 @@ class TapZohoBooks(Tap):
             th.DateTimeType,
             description="The earliest record date to sync",
         ),
+        th.Property(
+            "full_sync_account_transactions",
+            th.BooleanType,
+            description="Determines if chart of accounts syncs incrementally",
+        ),
     ).to_dict()
 
     def discover_streams(self) -> List[Stream]:
