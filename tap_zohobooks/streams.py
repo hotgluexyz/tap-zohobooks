@@ -1309,9 +1309,7 @@ class SalesOrdersStream(ZohoBooksStream):
                 params=params,
                 headers=self.authenticator.auth_headers
             )
-            prepared_request = req.prepare()
-            prepared_request.timeout = self.timeout
-            detail_response = self._request(prepared_request)
+            detail_response = self._request(req.prepare(), timeout=self.timeout)
 
             sales_details = extract_jsonpath(self.records_jsonpath, input=detail_response.json())
 

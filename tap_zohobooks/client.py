@@ -40,12 +40,12 @@ class ZohoBooksStream(RESTStream):
     def get_new_paginator(self):
         return ZohoBooksPaginator(start_value=1)
     
-    def _request(self, prepared_request, context={}) -> requests.Response:
+    def _request(self, prepared_request, context={}, timeout=None) -> requests.Response:
         """
         Custom request function to enable us to throtle the requests,
         distributing them equaly during the runtime.
         """
-        response = super()._request(prepared_request, context=context)
+        response = super()._request(prepared_request, context=context,timeout=timeout)
         rate_limit = response.headers.get("X-Rate-Limit-Limit")
         remaining_rate_limit = response.headers.get("X-Rate-Limit-Remaining")
         if rate_limit and remaining_rate_limit:
